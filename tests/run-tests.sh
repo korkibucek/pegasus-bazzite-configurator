@@ -170,6 +170,14 @@ config_set_defaults; CFG_EMULATORS="dolphin"; CFG_SYSTEMS="auto"
 dolphin_systems="$(pegasus_resolve_systems | sort | tr '\n' ' ')"
 check "auto systems for dolphin" "gamecube wii " "$dolphin_systems"
 
+# --- emu_bios_dir (BIOS preflight paths) -------------------------------------
+HOME="/home/tester"
+check "bios dir pcsx2 expands HOME" "/home/tester/.var/app/net.pcsx2.PCSX2/config/PCSX2/bios" "$(emu_bios_dir pcsx2)"
+emu_bios_dir dolphin >/dev/null 2>&1 && r=0 || r=1
+check_rc "dolphin needs no BIOS dir" 1 "$r"
+emu_bios_dir retroarch >/dev/null 2>&1 && r=0 || r=1
+check_rc "retroarch has a system/ dir" 0 "$r"
+
 # --- detect_rom_library (EmuDeck/ES-DE reuse) -------------------------------
 lib_home="$TMP/emuhome"; mkdir -p "$lib_home/Emulation/roms"
 HOME="$lib_home" detect_rom_library && r=0 || r=1
