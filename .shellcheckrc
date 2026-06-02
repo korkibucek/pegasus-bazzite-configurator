@@ -1,0 +1,14 @@
+# ShellCheck configuration for pegasus-bazzite-configurator.
+#
+# external-sources: follow `source` directives into the lib/ modules so the
+#   call graph is analysed as a whole (we lint the entrypoints, which source
+#   the libraries).
+external-sources=true
+#
+# SC2034 (unused variable): this is a sourced-library codebase. Detection and
+#   prerequisite modules export "state" globals (e.g. PBC_IS_BAZZITE,
+#   PBC_FLATPAK_OK) that are consumed by other modules, by validate.sh, or by
+#   the test suite. ShellCheck cannot see every consumer when a library is the
+#   unit of analysis, so SC2034 produces false positives here. Disabled
+#   project-wide and documented deliberately.
+disable=SC2034

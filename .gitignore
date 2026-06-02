@@ -1,0 +1,14 @@
+# Runtime artifacts produced by the tool live under the user's XDG data dir,
+# never in the repo — but ignore any local copies just in case.
+*.log
+/state/
+/backups/
+
+# Editor / OS noise
+*.swp
+*~
+.DS_Store
+
+# Local scratch configs (keep config/example-config.yaml tracked)
+/config/local-*.yaml
+/tmp/
