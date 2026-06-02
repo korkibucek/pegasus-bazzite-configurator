@@ -145,7 +145,7 @@ main() {
     [[ "$OPT_FORCE" == 1 ]] && CFG_MODE=force
     [[ "$CFG_TARGET" == auto ]] && { [[ "${PBC_FORM_FACTOR:-}" == handheld ]] && CFG_TARGET=gamemode || CFG_TARGET=desktop; }
     if [[ "$CFG_TARGET" == gamemode ]]; then
-        PBC_OUTSTANDING+=("Game Mode: in Desktop Mode open Steam → Games → Add a Non-Steam Game, add Pegasus (command: 'flatpak run $PEGASUS_FLATPAK_ID'), then switch to Game Mode and launch it from your library. The generated launch commands use 'flatpak-spawn --host' so emulators start correctly from within Game Mode.")
+        PBC_OUTSTANDING+=("Game Mode: add Pegasus to Steam — run 'scripts/add-to-steam.sh' (with Steam closed) to do it automatically, or in Desktop Mode use Steam → Games → Add a Non-Steam Game ('flatpak run $PEGASUS_FLATPAK_ID'). Then launch it from your library in Game Mode. Generated launch commands use 'flatpak-spawn --host' so emulators start correctly there.")
     fi
     log_step "Effective configuration"
     config_summary | tee -a "${LOG_FILE:-/dev/null}" 2>/dev/null || config_summary

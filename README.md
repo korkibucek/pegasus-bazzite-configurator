@@ -85,6 +85,7 @@ Update / undo / uninstall:
 ./scripts/deploy.sh --list-emulators # show the supported emulator catalog
 ./scripts/deploy.sh --list-systems   # show the supported system catalog
 ./scripts/deploy.sh --repair --config <cfg>   # re-apply ROM sandbox permissions only
+./scripts/add-to-steam.sh            # opt-in: add Pegasus to Steam for Game Mode
 ./scripts/install-cores.sh --config <cfg>     # opt-in: download needed RetroArch cores
 ./scripts/update.sh                  # flatpak update Pegasus + your emulators
 ./scripts/restore.sh --list          # show backups

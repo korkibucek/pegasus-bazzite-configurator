@@ -137,5 +137,16 @@ YAML
         [ ! -d "$HOME/.var/app/org.libretro.RetroArch" ] || { echo "FAIL: dry-run created core dir"; exit 1; }
         echo "OK: core dry-run lists URLs and downloads nothing"
 
+        echo; echo "### 10. add-to-steam dry-run (binary VDF, simulated Steam user)"
+        if command -v python3 >/dev/null 2>&1; then
+            mkdir -p "$HOME/.steam/steam/userdata/999/config"
+            scripts/add-to-steam.sh --yes --dry-run | tee /tmp/smoke-steam.log
+            grep -qi "would add" /tmp/smoke-steam.log || { echo "FAIL: add-to-steam dry-run output missing"; exit 1; }
+            [ ! -f "$HOME/.steam/steam/userdata/999/config/shortcuts.vdf" ] || { echo "FAIL: dry-run wrote shortcuts.vdf"; exit 1; }
+            echo "OK: add-to-steam dry-run wrote nothing"
+        else
+            echo "SKIP: no python3 in this minimal image (the Steam helper needs python3, present on real Bazzite)"
+        fi
+
         echo; echo "ALL SMOKE CHECKS COMPLETED"
     '

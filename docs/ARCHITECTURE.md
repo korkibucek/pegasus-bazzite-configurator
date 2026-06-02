@@ -145,4 +145,9 @@ what needs real Bazzite.
 - Runtime behaviour (launching, Game Mode, real sandbox) cannot be proven off
   real hardware.
 - We never auto-download AppImages or third-party binaries; AppImage install is a
-  documented manual step.
+  documented manual step. (`install-cores.sh` is the one opt-in downloader, pinned
+  to the official libretro buildbot with zip validation.)
+- One helper (`add-to-steam.sh`) uses a small stdlib-`python3` module for Steam's
+  **binary** `shortcuts.vdf` — binary parsing in bash would be unsafe. `python3`
+  ships in the Fedora/Bazzite base, so this adds no install step; everything else
+  stays pure bash.
