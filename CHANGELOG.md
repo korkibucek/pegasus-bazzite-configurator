@@ -17,6 +17,11 @@ pre-1.0 development entries until the first tagged release.
   on how to add Pegasus to Steam for Game Mode (#16).
 
 ### Added
+- `scripts/add-to-steam.sh` (#22): opt-in helper that adds Pegasus to Steam as a
+  non-Steam game for Game Mode. Safely edits the binary `shortcuts.vdf` via a
+  stdlib-Python parser (`lib/steam_shortcuts.py`): refuses to run while Steam is
+  open, backs up the file first, and appends idempotently without disturbing
+  existing shortcuts. Dry-run supported; covered by a round-trip self-test.
 - `scripts/install-cores.sh` (#24): opt-in helper that downloads the libretro
   cores required by your selected RetroArch systems from the official libretro
   buildbot (HTTPS, host pinned). Each download is validated as a real ZIP before

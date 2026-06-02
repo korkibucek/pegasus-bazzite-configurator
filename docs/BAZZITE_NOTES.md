@@ -107,6 +107,18 @@ one is created (an empty collection) and reported in the log.
   `flatpak-spawn --host` prefix is what lets a Flatpak Pegasus start emulators
   from within Game Mode.
 
+  Automate the "add to Steam" step (with Steam closed):
+
+  ```bash
+  ./scripts/add-to-steam.sh --dry-run   # preview
+  ./scripts/add-to-steam.sh             # add the shortcut
+  ```
+
+  This edits Steam's binary `shortcuts.vdf` safely: it refuses to run while
+  Steam is open, backs the file up first, and appends without disturbing your
+  other non-Steam shortcuts. Restart Steam afterwards; the shortcut appears in
+  your library.
+
 ## What a Fedora container proves — and what it cannot
 
 The smoke test (`make smoke-fedora`) runs the suite in a Fedora container and
