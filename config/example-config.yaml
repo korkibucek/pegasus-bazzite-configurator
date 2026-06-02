@@ -1,0 +1,70 @@
+# ===========================================================================
+# Example non-interactive configuration for pegasus-bazzite-configurator.
+#
+# Run with:
+#   scripts/deploy.sh --config config/example-config.yaml --non-interactive
+#
+# This file uses a small YAML subset (scalar values, inline comma lists, and
+# block sequences). It is parsed WITHOUT requiring `yq`. Every key below shows
+# its default; uncomment/adjust as needed.
+# ===========================================================================
+
+# Absolute path to the root that holds per-system ROM folders.
+# On a Steam Deck this is often the SD card, e.g. /run/media/deck/<LABEL>/ROMs
+rom_root: "/home/deck/ROMs"
+
+# Create rom_root (and per-system subfolders) if missing? yes|no
+create_rom_dir: yes
+
+# How to install Pegasus Frontend: flatpak | appimage | skip
+#   flatpak  - recommended on Bazzite (reversible, no reboot, no layering)
+#   appimage - you download the AppImage yourself (manual step is reported)
+#   skip     - configure only; do not install Pegasus
+pegasus_install: flatpak
+
+# Where Pegasus reads its config. "auto" derives it from the install method:
+#   flatpak  -> ~/.var/app/org.pegasus_frontend.Pegasus/config/pegasus-frontend
+#   native   -> ~/.config/pegasus-frontend
+pegasus_config_dir: auto
+
+# Name of the per-system media/artwork subfolder (under each system dir).
+media_dirname: media
+
+# Emulators to install/configure. Valid keys:
+#   retroarch dolphin pcsx2 ppsspp duckstation rpcs3 mame melonds scummvm
+# Either an inline list:
+#   emulators: retroarch, dolphin, pcsx2, ppsspp, duckstation
+# or a block sequence:
+emulators:
+  - retroarch
+  - dolphin
+  - pcsx2
+  - ppsspp
+  - duckstation
+
+# Which systems to generate. "auto" = every catalogued system whose default
+# emulator is in the list above. Or list shortnames explicitly, e.g.:
+#   systems: snes, n64, psx, ps2, gamecube
+systems: auto
+
+# install-missing  = only install/configure what is absent (safe, idempotent)
+# force            = overwrite existing metadata (existing files are backed up)
+mode: install-missing
+
+# Back up existing Pegasus config before any change? yes|no
+backup: yes
+
+# Create example (empty) collections + HOW_TO_ADD_ROMS notes for each system.
+example_collections: yes
+
+# Apply controller-friendly launch defaults (batch/fullscreen flags). yes|no
+controller_friendly: yes
+
+# auto | gamemode | desktop. "auto" picks gamemode on detected handhelds.
+target: auto
+
+# Extra ROM/media locations to grant emulators access to (SD cards, externals).
+# Space/comma list or a block sequence. Leave empty if everything is under
+# rom_root. Example:
+#   extra_rom_paths: /run/media/deck/SDCARD/ROMs
+extra_rom_paths: ""
