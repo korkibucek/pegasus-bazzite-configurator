@@ -129,6 +129,19 @@ LAUNCH_PREFIX="flatpak-spawn --host "
 ll3="$(build_launch_line pcsx2 '')"
 check_contains "flatpak prefix applied" "$ll3" "flatpak-spawn --host flatpak run net.pcsx2.PCSX2"
 
+# --- controller_friendly toggles windowed variant ---------------------------
+LAUNCH_PREFIX=""
+CFG_CONTROLLER_FRIENDLY=yes
+cf="$(build_launch_line duckstation '')"
+check "duckstation controller-friendly = fullscreen" 'flatpak run org.duckstation.DuckStation -batch -fullscreen "{file.path}"' "$cf"
+CFG_CONTROLLER_FRIENDLY=no
+win="$(build_launch_line duckstation '')"
+check "duckstation windowed drops -fullscreen" 'flatpak run org.duckstation.DuckStation -batch "{file.path}"' "$win"
+# Emulator with no windowed variant falls back to the controller-friendly form.
+ppsspp_win="$(build_launch_line ppsspp '')"
+check "ppsspp (no windowed variant) falls back" 'flatpak run org.ppsspp.PPSSPP "{file.path}"' "$ppsspp_win"
+CFG_CONTROLLER_FRIENDLY=yes  # restore
+
 # --- pegasus_resolve_systems (auto filters by selected emulator) ------------
 config_set_defaults; CFG_EMULATORS="dolphin"; CFG_SYSTEMS="auto"
 dolphin_systems="$(pegasus_resolve_systems | sort | tr '\n' ' ')"
