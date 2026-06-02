@@ -93,6 +93,23 @@ detect_form_factor() {
     esac
 }
 
+# detect_rom_library — look for an existing EmuDeck / ES-DE ROM library so we
+# can reuse it instead of creating a parallel ~/ROMs tree. Sets PBC_ROM_LIBRARY
+# to the first match (or empty). Read-only; never moves anything.
+detect_rom_library() {
+    PBC_ROM_LIBRARY=""
+    local c g
+    local candidates=("$HOME/Emulation/roms" "$HOME/Emulation/ROMs")
+    # EmuDeck on SD cards / external drives mounts under /run/media/...
+    for g in /run/media/*/*/Emulation/roms /run/media/*/Emulation/roms; do
+        [[ -d "$g" ]] && candidates+=("$g")
+    done
+    for c in "${candidates[@]}"; do
+        if [[ -d "$c" ]]; then PBC_ROM_LIBRARY="$c"; return 0; fi
+    done
+    return 1
+}
+
 # detect_all — run every detector. Safe to call multiple times.
 detect_all() { detect_os; detect_atomic; detect_form_factor; }
 

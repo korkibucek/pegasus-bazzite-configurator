@@ -128,6 +128,7 @@ main() {
         log_info "loading config: $CONFIG_FILE"
         parse_config_file "$CONFIG_FILE"
     fi
+    maybe_adopt_existing_library
     config_interactive
     # CLI flags take precedence over the config file / prompts.
     [[ "$OPT_FORCE" == 1 ]] && CFG_MODE=force
@@ -163,6 +164,27 @@ main() {
         exit 1
     fi
     return 0
+}
+
+# maybe_adopt_existing_library — if an EmuDeck/ES-DE library is found and the
+# user hasn't already chosen a non-default rom_root, adopt it per CFG_REUSE_LIBRARY.
+# Adopting only sets the rom_root DEFAULT; in interactive mode the rom_root prompt
+# still lets the user confirm or change it.
+maybe_adopt_existing_library() {
+    detect_rom_library || return 0
+    log_info "found existing ROM library: $PBC_ROM_LIBRARY"
+    # Respect an explicitly configured rom_root (anything other than the built-in default).
+    [[ "$CFG_ROM_ROOT" == "$HOME/ROMs" ]] || { log_debug "rom_root explicitly set; not adopting library"; return 0; }
+    case "$CFG_REUSE_LIBRARY" in
+        no)   log_info "reuse_existing_library=no — keeping $CFG_ROM_ROOT" ;;
+        yes)  CFG_ROM_ROOT="$PBC_ROM_LIBRARY"; log_ok "reusing existing library as ROM root: $CFG_ROM_ROOT" ;;
+        auto)
+            if [[ "$ASSUME_YES" == 1 ]]; then
+                log_info "non-interactive + reuse_existing_library=auto — not adopting (set reuse_existing_library: yes to opt in)"
+            else
+                CFG_ROM_ROOT="$PBC_ROM_LIBRARY"   # becomes the rom_root prompt default
+            fi ;;
+    esac
 }
 
 print_summary() {

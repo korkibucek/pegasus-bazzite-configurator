@@ -16,6 +16,13 @@ rom_root: "/home/deck/ROMs"
 # Create rom_root (and per-system subfolders) if missing? yes|no
 create_rom_dir: yes
 
+# Reuse a detected EmuDeck / ES-DE library (e.g. ~/Emulation/roms) as rom_root:
+#   auto - interactive: offer it as the rom_root default; non-interactive: ignore
+#   yes  - always adopt a detected library as rom_root (even non-interactive)
+#   no   - never adopt; always use rom_root above
+# Existing per-system folders are reused (e.g. ES-DE's "gc"); ROMs are never moved.
+reuse_existing_library: auto
+
 # How to install Pegasus Frontend: flatpak | appimage | skip
 #   flatpak  - recommended on Bazzite (reversible, no reboot, no layering)
 #   appimage - you download the AppImage yourself (manual step is reported)
