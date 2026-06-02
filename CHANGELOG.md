@@ -17,6 +17,9 @@ pre-1.0 development entries until the first tagged release.
   on how to add Pegasus to Steam for Game Mode (#16).
 
 ### Added
+- BIOS/firmware preflight in `validate.sh` (#23): WARNs (never fails) per
+  selected emulator when the expected BIOS directory is empty/missing, printing
+  the exact target path and a hint. Never lists or fetches copyrighted files.
 - EmuDeck / ES-DE library reuse (#21): detects an existing `~/Emulation/roms`
   (incl. SD cards) and can adopt it as `rom_root` (`reuse_existing_library:
   auto|yes|no`). Reconciles differing folder names via an alias map (e.g. ES-DE
