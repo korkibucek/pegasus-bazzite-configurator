@@ -166,5 +166,5 @@ conventions.
 
 ## License
 
-No license has been specified for this repository yet. Until one is added, no
-usage rights are granted beyond viewing. Open an issue if you intend to use it.
+Licensed under the **Apache License, Version 2.0** — see [LICENSE](LICENSE) and
+[NOTICE](NOTICE). Copyright 2026 Robert Morgan.
