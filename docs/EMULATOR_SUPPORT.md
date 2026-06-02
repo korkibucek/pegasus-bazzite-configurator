@@ -62,6 +62,22 @@ Cores install to
 `~/.var/app/org.libretro.RetroArch/config/retroarch/cores/<core>_libretro.so`,
 which is exactly the path the generated `launch:` line references.
 
+### Auto-downloading cores (opt-in)
+
+To skip the manual step, run the opt-in helper, which fetches exactly the cores
+your selected RetroArch systems need:
+
+```bash
+./scripts/install-cores.sh --config <your-config> --dry-run   # list cores + URLs
+./scripts/install-cores.sh --config <your-config>             # download them
+```
+
+Cores come from the **official libretro buildbot** over HTTPS (host pinned in
+`scripts/lib/emulators.sh`); each download is validated as a real ZIP before
+extraction and is never executed. Existing cores are kept unless `--force` (and
+backed up first). This downloads third-party binaries — run it only if you
+accept that trust boundary.
+
 ## BIOS / firmware (you must provide)
 
 Several emulators need files this tool will **never** supply:

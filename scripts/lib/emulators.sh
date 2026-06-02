@@ -137,6 +137,20 @@ emu_installed() {
     flatpak info "${EMU_ID[$1]}" >/dev/null 2>&1
 }
 
+# --- RetroArch core download (official libretro buildbot) -------------------
+# Cores are NOT bundled by the Flathub RetroArch. install-cores.sh can fetch
+# them from the OFFICIAL libretro buildbot (https only). Host is pinned here so
+# there is a single trusted source; downloads are validated as real zips before
+# extraction and never executed.
+: "${RA_CORE_BUILDBOT:=https://buildbot.libretro.com/nightly/linux/x86_64/latest}"
+RA_CORE_DIR_REL=".var/app/org.libretro.RetroArch/config/retroarch/cores"
+
+# ra_core_url CORE -> the buildbot artifact URL for a libretro core.
+ra_core_url() { printf '%s/%s_libretro.so.zip' "$RA_CORE_BUILDBOT" "$1"; }
+
+# ra_core_dir -> absolute path to the RetroArch Flatpak cores directory.
+ra_core_dir() { printf '%s/%s' "$HOME" "$RA_CORE_DIR_REL"; }
+
 # ensure_flathub — make sure a flathub remote exists; add at --user scope if not.
 ensure_flathub() {
     if ! have flatpak; then
