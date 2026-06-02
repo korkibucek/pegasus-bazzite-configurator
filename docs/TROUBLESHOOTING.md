@@ -16,7 +16,13 @@ flatpak info --show-permissions <emulator-app-id>
 ```
 
 Re-running `./scripts/deploy.sh` re-applies these overrides for all selected
-emulators. If ROMs are on an SD card, add the mount to `extra_rom_paths`.
+emulators. For a fast, config-only fix that touches nothing else, use:
+
+```bash
+./scripts/deploy.sh --repair --config <your-config>     # add --dry-run to preview
+```
+
+If ROMs are on an SD card, add the mount to `extra_rom_paths`.
 
 ## Pegasus (Flatpak) won't start emulators at all in Game Mode
 

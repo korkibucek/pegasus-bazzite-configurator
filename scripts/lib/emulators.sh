@@ -100,6 +100,15 @@ emu_bios_dir() {
 # emu_exists KEY -> 0 if the key is in the catalog.
 emu_exists() { [[ -n "${EMU_ID[$1]:-}" ]]; }
 
+# emu_catalog_list — print the emulator catalog (for `deploy.sh --list-emulators`).
+emu_catalog_list() {
+    printf '%-12s %-34s %s\n' "KEY" "NAME" "FLATHUB ID"
+    local k
+    for k in "${EMU_ORDER[@]}"; do
+        printf '%-12s %-34s %s\n' "$k" "${EMU_NAME[$k]}" "${EMU_ID[$k]}"
+    done
+}
+
 # emu_installed KEY -> 0 if the Flatpak is installed.
 emu_installed() {
     have flatpak || return 1
