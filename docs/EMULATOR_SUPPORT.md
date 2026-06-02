@@ -22,6 +22,22 @@ filesystem access to your ROM root. Catalog lives in
 When Pegasus is a Flatpak, every launch line is additionally prefixed with
 `flatpak-spawn --host ` so the sandboxed Pegasus can start the host Flatpak.
 
+### `controller_friendly` (launch flags)
+
+`controller_friendly: yes` (default) uses the fullscreen / batch / no-GUI form
+shown above — ideal for a couch/handheld controller experience. Setting it to
+`no` emits a windowed/desktop variant for emulators where it makes a difference:
+
+| Emulator | controller-friendly (`yes`) | windowed (`no`) |
+|---|---|---|
+| DuckStation | `-batch -fullscreen` | `-batch` |
+| PCSX2 | `-batch` | (no flags — opens GUI) |
+| Dolphin | `-b -e` | `-e` (keeps GUI) |
+| RPCS3 | `--no-gui` | (shows GUI) |
+
+Emulators without a windowed variant (RetroArch, PPSSPP, MAME, melonDS, ScummVM)
+use the same line either way; adjust fullscreen behaviour in their own settings.
+
 ## RetroArch cores are not bundled
 
 The Flathub RetroArch ships **without cores**. Install them once:

@@ -119,8 +119,13 @@ pegasus_resolve_systems() {
 
 # build_launch_line EMULATOR RA_CORE — produce the final Pegasus launch line,
 # substituting the RetroArch core path and prefixing for cross-sandbox launch.
+# EMU_LAUNCH is the controller-friendly (fullscreen/batch) form; when
+# controller_friendly=no and a windowed variant exists, use that instead.
 build_launch_line() {
     local emu="$1" core="$2" tmpl="${EMU_LAUNCH[$1]:-}"
+    if ! cfg_is_yes "$CFG_CONTROLLER_FRIENDLY" && [[ -n "${EMU_LAUNCH_WINDOWED[$1]:-}" ]]; then
+        tmpl="${EMU_LAUNCH_WINDOWED[$1]}"
+    fi
     [[ -n "$tmpl" ]] || { log_error "no launch template for emulator '$emu'"; return 1; }
     if [[ "$emu" == retroarch ]]; then
         local cp="$HOME/.var/app/${EMU_ID[retroarch]}/config/retroarch/cores/${core}_libretro.so"

@@ -20,7 +20,11 @@
 #                   {file.path}, {file.dir}, {file.basename} -> Pegasus vars
 #                   (left literal so Pegasus substitutes them at launch time)
 #   EMU_NOTE[k]   optional caveat surfaced to the user
-declare -gA EMU_NAME EMU_ID EMU_LAUNCH EMU_NOTE
+#   EMU_LAUNCH_WINDOWED[k]  optional windowed/desktop variant used when
+#                 controller_friendly=no. If absent, EMU_LAUNCH is used.
+#                 EMU_LAUNCH itself IS the controller-friendly form (fullscreen /
+#                 batch / no-GUI where applicable).
+declare -gA EMU_NAME EMU_ID EMU_LAUNCH EMU_NOTE EMU_LAUNCH_WINDOWED
 
 EMU_NAME[retroarch]="RetroArch (multi-system)"
 EMU_ID[retroarch]="org.libretro.RetroArch"
@@ -30,10 +34,12 @@ EMU_NOTE[retroarch]="Cores are NOT bundled; install them once via RetroArch > On
 EMU_NAME[dolphin]="Dolphin (GameCube / Wii)"
 EMU_ID[dolphin]="org.DolphinEmu.dolphin-emu"
 EMU_LAUNCH[dolphin]='flatpak run org.DolphinEmu.dolphin-emu -b -e "{file.path}"'
+EMU_LAUNCH_WINDOWED[dolphin]='flatpak run org.DolphinEmu.dolphin-emu -e "{file.path}"'
 
 EMU_NAME[pcsx2]="PCSX2 (PlayStation 2)"
 EMU_ID[pcsx2]="net.pcsx2.PCSX2"
 EMU_LAUNCH[pcsx2]='flatpak run net.pcsx2.PCSX2 -batch "{file.path}"'
+EMU_LAUNCH_WINDOWED[pcsx2]='flatpak run net.pcsx2.PCSX2 "{file.path}"'
 EMU_NOTE[pcsx2]="Requires a legally dumped PS2 BIOS, configured once in PCSX2 settings."
 
 EMU_NAME[ppsspp]="PPSSPP (PSP)"
@@ -43,11 +49,13 @@ EMU_LAUNCH[ppsspp]='flatpak run org.ppsspp.PPSSPP "{file.path}"'
 EMU_NAME[duckstation]="DuckStation (PlayStation 1)"
 EMU_ID[duckstation]="org.duckstation.DuckStation"
 EMU_LAUNCH[duckstation]='flatpak run org.duckstation.DuckStation -batch -fullscreen "{file.path}"'
+EMU_LAUNCH_WINDOWED[duckstation]='flatpak run org.duckstation.DuckStation -batch "{file.path}"'
 EMU_NOTE[duckstation]="DuckStation's license/Flathub availability has changed over time; if 'flatpak install' fails, use SwanStation via RetroArch (psx) instead. Requires a legally dumped PS1 BIOS."
 
 EMU_NAME[rpcs3]="RPCS3 (PlayStation 3)"
 EMU_ID[rpcs3]="net.rpcs3.RPCS3"
 EMU_LAUNCH[rpcs3]='flatpak run net.rpcs3.RPCS3 --no-gui "{file.path}"'
+EMU_LAUNCH_WINDOWED[rpcs3]='flatpak run net.rpcs3.RPCS3 "{file.path}"'
 EMU_NOTE[rpcs3]="Requires the PS3 firmware (legally obtained) installed once in RPCS3. Demanding; best on desktop hardware."
 
 EMU_NAME[mame]="MAME (Arcade)"
