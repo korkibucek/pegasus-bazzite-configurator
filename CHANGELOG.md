@@ -17,6 +17,7 @@ pre-1.0 development entries until the first tagged release.
   on how to add Pegasus to Steam for Game Mode (#16).
 
 ### Added
+- `LICENSE` (Apache-2.0) + `NOTICE`; README license section updated (#39).
 - `CONTRIBUTING.md` — developer guide: repo layout, local dev gate, how to add a
   system/emulator, branch/PR conventions, and the hardware-validation boundary;
   linked from README (#38).
