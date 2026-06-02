@@ -7,6 +7,10 @@ pre-1.0 development entries until the first tagged release.
 ## [Unreleased]
 
 ### Changed
+- Test/CI hardening (#27): smoke harness defaults to **Fedora 44** (Bazzite 44's
+  base) and accepts any image via `PBC_SMOKE_IMAGE` / a full image ref (so a
+  trusted Bazzite image can be used); CI runs the smoke suite across a Fedora
+  42/43/44 matrix and now lints the `lib/*.sh` modules directly.
 - `controller_friendly` now actually affects generated launch lines: `no` emits
   windowed/desktop variants for DuckStation/PCSX2/Dolphin/RPCS3 (default `yes`
   output is unchanged). `target=gamemode` now surfaces a clear outstanding action

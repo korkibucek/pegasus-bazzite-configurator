@@ -22,9 +22,16 @@ so the process exit code reflects any failure (CI relies on this).
 ## Fedora container smoke test
 
 ```bash
-make smoke-fedora            # default Fedora tag
-./scripts/smoke-fedora-container.sh 42   # pick a tag
+make smoke-fedora                         # default: Fedora 44 (Bazzite 44's base)
+./scripts/smoke-fedora-container.sh 43    # pick a Fedora tag
+# Run against a Bazzite image you trust (script-level checks only; still cannot
+# exercise rpm-ostree/Game-Mode/sandbox/runtime):
+PBC_SMOKE_IMAGE=ghcr.io/ublue-os/bazzite ./scripts/smoke-fedora-container.sh
 ```
+
+> There is no official Bazzite image on Docker Hub (only unofficial mirrors),
+> so the harness defaults to Fedora 44 — the base Bazzite 44 is built on — and
+> lets you point `PBC_SMOKE_IMAGE` at any image you trust.
 
 What it does, step by step:
 
@@ -72,5 +79,11 @@ breakage", not "verified on target".
 
 ## CI
 
-`.github/workflows/ci.yml` runs ShellCheck, the unit tests, and the Fedora
-smoke test on push/PR. It uses only free, default GitHub-hosted runners.
+`.github/workflows/ci.yml` runs, on push/PR (free GitHub-hosted runners only):
+
+- **shellcheck** — lints the entrypoints (following sources into `lib/`) *and*
+  the `lib/*.sh` modules directly.
+- **unit-tests** — `tests/run-tests.sh`.
+- **fedora-smoke** — the smoke suite across a Fedora matrix (42/43/44);
+  non-44 tags are `continue-on-error` so the matrix never blocks on a tag that
+  is not currently published.

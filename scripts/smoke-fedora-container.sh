@@ -18,20 +18,40 @@
 #   - Launching GUI emulators / Pegasus at runtime
 #   - External SD-card mount behaviour
 #
-# Usage: scripts/smoke-fedora-container.sh [FEDORA_TAG]   (default: 41)
+# Usage:
+#   scripts/smoke-fedora-container.sh [TAG|IMAGE]
+#     (no arg)                  -> registry.fedoraproject.org/fedora:44
+#     44 / 43 / 42 ...          -> registry.fedoraproject.org/fedora:<tag>
+#     a ref with '/' or '@'     -> used verbatim (e.g. a trusted Bazzite image)
+#   PBC_SMOKE_IMAGE=<ref> scripts/smoke-fedora-container.sh   # full override
+#
+# Bazzite is built on Fedora; release 44 of Bazzite tracks Fedora 44, so Fedora
+# 44 is the default base. There is no OFFICIAL Bazzite image on Docker Hub (only
+# unofficial mirrors), so we do not hard-code one — point PBC_SMOKE_IMAGE at a
+# Bazzite image you trust (e.g. ghcr.io/ublue-os/bazzite) if you want to run the
+# script-level checks against the real userspace. Note: a plain container still
+# cannot exercise rpm-ostree, Game Mode, the graphical Flatpak sandbox, or
+# emulator runtime (see docs/TESTING.md).
 set -Eeuo pipefail
 
 REPO_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-FEDORA_TAG="${1:-41}"
-IMAGE="registry.fedoraproject.org/fedora:${FEDORA_TAG}"
+DEFAULT_FEDORA_TAG=44
+arg="${1:-}"
+if [[ -n "${PBC_SMOKE_IMAGE:-}" ]]; then
+    IMAGE="$PBC_SMOKE_IMAGE"
+elif [[ "$arg" == *"/"* || "$arg" == *"@"* ]]; then
+    IMAGE="$arg"                                   # full image reference
+else
+    IMAGE="registry.fedoraproject.org/fedora:${arg:-$DEFAULT_FEDORA_TAG}"
+fi
 
 # Pick a container engine.
 ENGINE=""
 for e in podman docker; do command -v "$e" >/dev/null 2>&1 && { ENGINE="$e"; break; }; done
 [[ -n "$ENGINE" ]] || { echo "ERROR: need podman or docker to run the smoke test" >&2; exit 1; }
 
-echo "== Fedora $FEDORA_TAG smoke test ($ENGINE) =="
-echo "Repo: $REPO_ROOT"
+echo "== container smoke test ($ENGINE) =="
+echo "Repo:  $REPO_ROOT"
 echo "Image: $IMAGE"
 echo
 
