@@ -17,6 +17,9 @@ pre-1.0 development entries until the first tagged release.
   on how to add Pegasus to Steam for Game Mode (#16).
 
 ### Added
+- RetroArch core-presence check in `validate.sh` (#40): per configured RetroArch
+  system, WARNs (never fails) when its `<core>_libretro.so` is missing, with the
+  exact path and the install command — catching the common "Failed to load core".
 - `scripts/add-to-steam.sh` (#22): opt-in helper that adds Pegasus to Steam as a
   non-Steam game for Game Mode. Safely edits the binary `shortcuts.vdf` via a
   stdlib-Python parser (`lib/steam_shortcuts.py`): refuses to run while Steam is

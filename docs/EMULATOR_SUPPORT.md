@@ -78,6 +78,10 @@ extraction and is never executed. Existing cores are kept unless `--force` (and
 backed up first). This downloads third-party binaries — run it only if you
 accept that trust boundary.
 
+`./scripts/validate.sh` also reports, per configured RetroArch system, whether
+its core `.so` is present (WARN with the exact path + the install command when
+missing) — catching the common "Failed to load core" before you hit it.
+
 ## BIOS / firmware (you must provide)
 
 Several emulators need files this tool will **never** supply:

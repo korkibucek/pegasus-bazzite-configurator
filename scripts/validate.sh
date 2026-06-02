@@ -143,6 +143,30 @@ main() {
         fi
     done
 
+    # 4b) RetroArch cores (WARN only) — missing cores are the #1 RetroArch
+    # failure ("Failed to load core"). Only meaningful when RetroArch is
+    # installed; otherwise the earlier 'not installed' check already flagged it.
+    if emu_installed retroarch; then
+        printf '\n%sRetroArch cores%s\n' "$C_BOLD" "$C_RESET"
+        local cdir; cdir="$(ra_core_dir)"
+        local ra_count=0 def_emu def_core pair emu core so
+        for sn in "${systems[@]}"; do
+            def_emu="$(_sys_field "$sn" SYS_EMULATOR)"
+            def_core="$(_sys_field "$sn" SYS_RA_CORE)"
+            pair="$(resolve_system_emulator "$sn" "$def_emu" "$def_core")"
+            emu="${pair%%$'\t'*}"; core="${pair#*$'\t'}"
+            [[ "$emu" == retroarch && -n "$core" ]] || continue
+            ra_count=$((ra_count+1))
+            so="$(ra_core_file "$core")"
+            if [[ -f "$so" ]]; then
+                ok "${sn}: core ${core} present"
+            else
+                warn "${sn}: core ${core} missing ($so) — run scripts/install-cores.sh or RetroArch > Online Updater > Core Downloader"
+            fi
+        done
+        [[ "$ra_count" == 0 ]] && ok "no RetroArch systems configured"
+    fi
+
     # 5) Backups
     printf '\n%sBackups%s\n' "$C_BOLD" "$C_RESET"
     local latest; latest="$(backup_latest)"
