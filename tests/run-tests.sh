@@ -170,6 +170,12 @@ config_set_defaults; CFG_EMULATORS="dolphin"; CFG_SYSTEMS="auto"
 dolphin_systems="$(pegasus_resolve_systems | sort | tr '\n' ' ')"
 check "auto systems for dolphin" "gamecube wii " "$dolphin_systems"
 
+# --- RetroArch core URLs (#24) ----------------------------------------------
+HOME="/home/tester"
+check "ra_core_url snes9x" "https://buildbot.libretro.com/nightly/linux/x86_64/latest/snes9x_libretro.so.zip" "$(ra_core_url snes9x)"
+check "ra_core_dir under HOME" "/home/tester/.var/app/org.libretro.RetroArch/config/retroarch/cores" "$(ra_core_dir)"
+check_contains "ra_core_url is https" "$(ra_core_url mgba)" "https://"
+
 # --- expanded catalog (#25) -------------------------------------------------
 for e in flycast cemu vita3k xemu; do
     emu_exists "$e" && r=0 || r=1; check_rc "emulator '$e' in catalog" 0 "$r"

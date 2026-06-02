@@ -131,5 +131,11 @@ YAML
         [ "$before" = "$after" ] || { echo "FAIL: uninstall dry-run removed files"; exit 1; }
         echo "OK: lifecycle dry-runs are non-destructive ($before metadata files intact)"
 
+        echo; echo "### 9. install-cores dry-run lists cores, downloads nothing"
+        scripts/install-cores.sh --config "$cfg" --yes --dry-run | tee /tmp/smoke-cores.log
+        grep -q "buildbot.libretro.com" /tmp/smoke-cores.log || { echo "FAIL: core URLs missing"; exit 1; }
+        [ ! -d "$HOME/.var/app/org.libretro.RetroArch" ] || { echo "FAIL: dry-run created core dir"; exit 1; }
+        echo "OK: core dry-run lists URLs and downloads nothing"
+
         echo; echo "ALL SMOKE CHECKS COMPLETED"
     '

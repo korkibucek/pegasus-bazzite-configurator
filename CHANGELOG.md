@@ -17,6 +17,11 @@ pre-1.0 development entries until the first tagged release.
   on how to add Pegasus to Steam for Game Mode (#16).
 
 ### Added
+- `scripts/install-cores.sh` (#24): opt-in helper that downloads the libretro
+  cores required by your selected RetroArch systems from the official libretro
+  buildbot (HTTPS, host pinned). Each download is validated as a real ZIP before
+  extraction and never executed; existing cores are kept unless `--force` (and
+  backed up). Dry-run lists cores + URLs and downloads nothing.
 - Expanded catalog (#25): emulators Flycast, Cemu, Vita3K, xemu; systems
   saturn, neogeo, lynx, wonderswan, c64, amiga (RetroArch cores) plus wiiu, vita,
   xbox (standalone). ES-DE folder aliases added (e.g. `atarilynx`). New systems
