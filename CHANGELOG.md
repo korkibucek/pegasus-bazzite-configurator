@@ -6,6 +6,12 @@ pre-1.0 development entries until the first tagged release.
 
 ## [Unreleased]
 
+### Changed
+- `controller_friendly` now actually affects generated launch lines: `no` emits
+  windowed/desktop variants for DuckStation/PCSX2/Dolphin/RPCS3 (default `yes`
+  output is unchanged). `target=gamemode` now surfaces a clear outstanding action
+  on how to add Pegasus to Steam for Game Mode (#16).
+
 ### Added
 - Initial deployment engine (`scripts/deploy.sh`) with interactive and
   non-interactive (`--config`) modes, dry-run, force, logging, backup, and a
