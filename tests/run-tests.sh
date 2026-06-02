@@ -170,6 +170,21 @@ config_set_defaults; CFG_EMULATORS="dolphin"; CFG_SYSTEMS="auto"
 dolphin_systems="$(pegasus_resolve_systems | sort | tr '\n' ' ')"
 check "auto systems for dolphin" "gamecube wii " "$dolphin_systems"
 
+# --- expanded catalog (#25) -------------------------------------------------
+for e in flycast cemu vita3k xemu; do
+    emu_exists "$e" && r=0 || r=1; check_rc "emulator '$e' in catalog" 0 "$r"
+done
+config_set_defaults; CFG_EMULATORS="retroarch"; CFG_SYSTEMS="auto"
+auto_ra="$(pegasus_resolve_systems | sort | tr '\n' ' ')"
+check_contains "saturn auto-included for retroarch" "$auto_ra" "saturn"
+check_contains "neogeo auto-included for retroarch" "$auto_ra" "neogeo"
+# Standalone-only systems must NOT appear when only retroarch is selected.
+case " $auto_ra " in *" wiiu "*) check "wiiu excluded w/o cemu" "excluded" "INCLUDED";; *) check "wiiu excluded w/o cemu" "excluded" "excluded";; esac
+config_set_defaults; CFG_EMULATORS="cemu"; CFG_SYSTEMS="auto"
+auto_cemu="$(pegasus_resolve_systems | tr '\n' ' ')"
+check_contains "wiiu auto-included for cemu" "$auto_cemu" "wiiu"
+config_set_defaults
+
 # --- catalog listings (--list-emulators / --list-systems) -------------------
 emu_list_out="$(emu_catalog_list)"
 check_contains "emu_catalog_list has header" "$emu_list_out" "FLATHUB ID"
