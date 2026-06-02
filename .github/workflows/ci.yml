@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+# Only free, default GitHub-hosted runners are used (no billing-sensitive
+# features). The Fedora job is the closest practical approximation to the target
+# userspace; it is NOT a substitute for testing on real Bazzite.
+
+jobs:
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ShellCheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: Lint (follows sources into lib/)
+        run: shellcheck -x scripts/deploy.sh scripts/validate.sh scripts/restore.sh scripts/smoke-fedora-container.sh tests/run-tests.sh
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run unit tests
+        run: bash tests/run-tests.sh
+
+  fedora-smoke:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:41
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: dnf -y install ShellCheck findutils git
+      - name: Syntax check
+        run: find scripts tests -name '*.sh' -print0 | xargs -0 -n1 bash -n
+      - name: ShellCheck (in Fedora)
+        run: shellcheck -x scripts/*.sh tests/*.sh
+      - name: Unit tests (in Fedora)
+        run: bash tests/run-tests.sh
+      - name: Dry-run is non-destructive and handles spaces
+        run: |
+          export HOME=/tmp/ci-home NO_COLOR=1
+          mkdir -p "$HOME"
+          printf 'rom_root: "/tmp/ci-home/My ROMs"\ncreate_rom_dir: yes\nemulators: retroarch, dolphin, pcsx2\nsystems: auto\n' > /tmp/ci.yaml
+          scripts/deploy.sh --config /tmp/ci.yaml --non-interactive --dry-run --allow-non-bazzite
+          test ! -e "/tmp/ci-home/My ROMs"   # dry-run created nothing
+      - name: Generation produces valid, quoted metadata
+        run: |
+          export HOME=/tmp/ci-home NO_COLOR=1
+          # flatpak is absent in the container, so installs are skipped; we only
+          # assert the config-generation path here.
+          scripts/deploy.sh --config /tmp/ci.yaml --non-interactive --allow-non-bazzite || true
+          meta="/tmp/ci-home/My ROMs/snes/metadata.pegasus.txt"
+          test -f "$meta"
+          grep -q '"{file.path}"' "$meta"
+          grep -q '^launch:' "$meta"
