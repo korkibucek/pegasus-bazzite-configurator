@@ -183,6 +183,7 @@ HOME="/home/tester"
 check "ra_core_url snes9x" "https://buildbot.libretro.com/nightly/linux/x86_64/latest/snes9x_libretro.so.zip" "$(ra_core_url snes9x)"
 check "ra_core_dir under HOME" "/home/tester/.var/app/org.libretro.RetroArch/config/retroarch/cores" "$(ra_core_dir)"
 check_contains "ra_core_url is https" "$(ra_core_url mgba)" "https://"
+check "ra_core_file path" "/home/tester/.var/app/org.libretro.RetroArch/config/retroarch/cores/snes9x_libretro.so" "$(ra_core_file snes9x)"
 
 # --- expanded catalog (#25) -------------------------------------------------
 for e in flycast cemu vita3k xemu; do

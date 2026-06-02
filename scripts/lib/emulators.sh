@@ -151,6 +151,9 @@ ra_core_url() { printf '%s/%s_libretro.so.zip' "$RA_CORE_BUILDBOT" "$1"; }
 # ra_core_dir -> absolute path to the RetroArch Flatpak cores directory.
 ra_core_dir() { printf '%s/%s' "$HOME" "$RA_CORE_DIR_REL"; }
 
+# ra_core_file CORE -> absolute path of the installed core .so for CORE.
+ra_core_file() { printf '%s/%s_libretro.so' "$(ra_core_dir)" "$1"; }
+
 # ensure_flathub — make sure a flathub remote exists; add at --user scope if not.
 ensure_flathub() {
     if ! have flatpak; then
