@@ -133,6 +133,10 @@ SYS_DIR_ALIASES[mastersystem]="sms"
 SYS_DIR_ALIASES[arcade]="mame fbneo"
 SYS_DIR_ALIASES[pcengine]="tg16 turbografx16 pcenginecd"
 SYS_DIR_ALIASES[psx]="ps1"
+SYS_DIR_ALIASES[lynx]="atarilynx"
+SYS_DIR_ALIASES[wonderswan]="wonderswancolor"
+SYS_DIR_ALIASES[amiga]="amiga500 amiga1200 amiga600 amigacd32"
+SYS_DIR_ALIASES[neogeo]="neogeocd"
 
 # resolve_system_dirname SHORTNAME DEFAULT_DIRNAME -> the folder name to use
 # under CFG_ROM_ROOT: the default if it exists, else a known alias that exists,

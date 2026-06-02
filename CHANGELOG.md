@@ -17,6 +17,10 @@ pre-1.0 development entries until the first tagged release.
   on how to add Pegasus to Steam for Game Mode (#16).
 
 ### Added
+- Expanded catalog (#25): emulators Flycast, Cemu, Vita3K, xemu; systems
+  saturn, neogeo, lynx, wonderswan, c64, amiga (RetroArch cores) plus wiiu, vita,
+  xbox (standalone). ES-DE folder aliases added (e.g. `atarilynx`). New systems
+  auto-include when their emulator is selected.
 - Operational flags (#26): `deploy.sh --repair` re-applies only the Flatpak
   sandbox permissions (ROM `--filesystem` access + Pegasus host-spawn), and
   `--list-emulators` / `--list-systems` print the catalogs. List output is
