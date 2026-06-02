@@ -11,7 +11,7 @@ TESTS := $(wildcard tests/*.sh)
 # without the false "unused" positives that linting a library in isolation
 # produces.
 LINT_TARGETS := $(SCRIPTS) $(TESTS)
-FEDORA_TAG ?= 41
+FEDORA_TAG ?= 44
 
 .PHONY: help lint syntax test smoke-fedora dry-run check all
 
