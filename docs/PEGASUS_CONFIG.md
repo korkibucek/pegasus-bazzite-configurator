@@ -107,6 +107,23 @@ Re-run `./scripts/deploy.sh` (with `--force` to regenerate existing systems).
 With `systems: auto`, the system is generated automatically if its
 `SYS_EMULATOR` is in your selected emulator list.
 
+## Overriding a system's emulator (without editing .conf)
+
+Use the `system_emulators` config key to point a system at a different installed
+emulator at deploy time — no `.conf` edit needed:
+
+```yaml
+emulators: retroarch, dolphin
+system_emulators: psx=retroarch:swanstation, n64=retroarch:mupen64plus_next
+```
+
+Format is `shortname=emulator[:core]`; the `:core` part applies to RetroArch.
+A system whose *effective* emulator is in your `emulators` list is auto-included
+(so the example above generates `psx` via RetroArch even though DuckStation is
+not selected). This is the clean way to use the documented DuckStation →
+SwanStation fallback. Overrides are validated: unknown system/emulator, or a
+RetroArch override with no core, fails fast.
+
 ## Editing generated metadata
 
 The files are plain text and meant to be edited. To regenerate from scratch, run
