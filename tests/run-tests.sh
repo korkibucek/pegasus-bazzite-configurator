@@ -170,6 +170,15 @@ config_set_defaults; CFG_EMULATORS="dolphin"; CFG_SYSTEMS="auto"
 dolphin_systems="$(pegasus_resolve_systems | sort | tr '\n' ' ')"
 check "auto systems for dolphin" "gamecube wii " "$dolphin_systems"
 
+# --- catalog listings (--list-emulators / --list-systems) -------------------
+emu_list_out="$(emu_catalog_list)"
+check_contains "emu_catalog_list has header" "$emu_list_out" "FLATHUB ID"
+check_contains "emu_catalog_list lists retroarch" "$emu_list_out" "org.libretro.RetroArch"
+check "emu_catalog_list row count == catalog+header" "$((${#EMU_ORDER[@]} + 1))" "$(printf '%s\n' "$emu_list_out" | grep -c .)"
+sys_list_out="$(pegasus_systems_list)"
+check_contains "pegasus_systems_list has header" "$sys_list_out" "SHORTNAME"
+check_contains "pegasus_systems_list lists snes" "$sys_list_out" "snes"
+
 # --- emu_bios_dir (BIOS preflight paths) -------------------------------------
 HOME="/home/tester"
 check "bios dir pcsx2 expands HOME" "/home/tester/.var/app/net.pcsx2.PCSX2/config/PCSX2/bios" "$(emu_bios_dir pcsx2)"

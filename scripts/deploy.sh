@@ -57,6 +57,11 @@ OPTIONS:
       --dry-run         Print everything that would change; change nothing.
   -f, --force           Force reconfigure (overwrite existing metadata).
       --allow-non-bazzite  Continue even if the OS is not detected as Bazzite.
+      --repair          Re-apply only the Flatpak sandbox permissions (ROM-path
+                        --filesystem access + Pegasus host-spawn) and exit. Use
+                        with --config. Honors --dry-run.
+      --list-emulators  Print the supported emulator catalog and exit.
+      --list-systems    Print the supported system catalog and exit.
       --restore [DIR]   Restore Pegasus config from a backup (latest if DIR
                         omitted) and exit.
   -q, --quiet           Suppress INFO output (errors/warnings still shown).
@@ -77,6 +82,9 @@ CONFIG_FILE=""
 ALLOW_NON_BAZZITE=0
 DO_RESTORE=0
 RESTORE_DIR=""
+DO_REPAIR=0
+DO_LIST_EMU=0
+DO_LIST_SYS=0
 OPT_FORCE=0   # CLI --force; applied AFTER config-file load so the flag wins
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -86,6 +94,9 @@ while [[ $# -gt 0 ]]; do
         --dry-run)          DRY_RUN=1; shift ;;
         -f|--force)         OPT_FORCE=1; shift ;;
         --allow-non-bazzite) ALLOW_NON_BAZZITE=1; shift ;;
+        --repair)           DO_REPAIR=1; shift ;;
+        --list-emulators)   DO_LIST_EMU=1; shift ;;
+        --list-systems)     DO_LIST_SYS=1; shift ;;
         --restore)          DO_RESTORE=1
                             if [[ -n "${2:-}" && "${2:0:1}" != "-" ]]; then RESTORE_DIR="$2"; shift; fi
                             shift ;;
@@ -166,6 +177,43 @@ main() {
     return 0
 }
 
+# repair_mode — re-apply ONLY the Flatpak sandbox permissions. This is the
+# common fix when ROM access breaks (app reset, profile change) and is far
+# faster/safer than a full re-run. Honors --config and --dry-run.
+repair_mode() {
+    log_init ""
+    config_set_defaults
+    [[ -n "$CONFIG_FILE" ]] && parse_config_file "$CONFIG_FILE"
+    detect_all
+    pegasus_resolve_config_dir
+    is_dry_run && log_warn "DRY-RUN MODE — no permissions will be changed"
+    log_step "Repair: re-applying Flatpak sandbox permissions"
+    log_info "ROM root: $CFG_ROM_ROOT   extra: ${CFG_EXTRA_ROM_PATHS:-（none）}"
+
+    if ! have flatpak && ! is_dry_run; then
+        die "flatpak not installed — nothing to repair (run on the target system)"
+    fi
+    # Re-grant ROM access to each configured emulator.
+    local k
+    for k in $CFG_EMULATORS; do
+        emu_exists "$k" || { log_warn "unknown emulator '$k' — skipping"; continue; }
+        # shellcheck disable=SC2086  # intentional split of the extra-paths list
+        emu_grant_rom_access "$k" "$CFG_ROM_ROOT" $CFG_EXTRA_ROM_PATHS
+        log_ok "re-applied ROM access for ${k}"
+    done
+    # Re-grant Pegasus host-spawn + ROM access when it is a Flatpak.
+    if flatpak info "$PEGASUS_FLATPAK_ID" >/dev/null 2>&1 || [[ "$CFG_PEGASUS_INSTALL" == flatpak ]]; then
+        PBC_PEGASUS_IS_FLATPAK=1
+        run_cmd flatpak override --user "$PEGASUS_FLATPAK_ID" --talk-name=org.freedesktop.Flatpak
+        # shellcheck disable=SC2086
+        pegasus_grant_paths "$CFG_ROM_ROOT" $CFG_EXTRA_ROM_PATHS
+        log_ok "re-applied Pegasus host-spawn + ROM access"
+    fi
+    log_ok "repair complete"
+    is_dry_run && printf '\n%sThis was a DRY RUN — no permissions changed.%s\n' "$C_YELLOW" "$C_RESET"
+    return 0
+}
+
 # maybe_adopt_existing_library — if an EmuDeck/ES-DE library is found and the
 # user hasn't already chosen a non-default rom_root, adopt it per CFG_REUSE_LIBRARY.
 # Adopting only sets the rom_root DEFAULT; in interactive mode the rom_root prompt
@@ -241,7 +289,12 @@ EOF
     return 0
 }
 
-# --- restore shortcut -------------------------------------------------------
+# --- introspection / maintenance shortcuts ----------------------------------
+# Pure-output listings: drop the ERR trap and tolerate a SIGPIPE from a closed
+# consumer (e.g. `--list-systems | head`) so they never report a spurious error.
+if [[ "$DO_LIST_EMU" == 1 ]]; then trap - ERR; emu_catalog_list || true; exit 0; fi
+if [[ "$DO_LIST_SYS" == 1 ]]; then trap - ERR; pegasus_systems_list || true; exit 0; fi
+if [[ "$DO_REPAIR" == 1 ]]; then repair_mode; exit $?; fi
 if [[ "$DO_RESTORE" == 1 ]]; then
     log_init ""
     backup_restore "$RESTORE_DIR"
