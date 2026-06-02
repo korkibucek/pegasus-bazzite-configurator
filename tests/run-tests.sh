@@ -142,6 +142,29 @@ ppsspp_win="$(build_launch_line ppsspp '')"
 check "ppsspp (no windowed variant) falls back" 'flatpak run org.ppsspp.PPSSPP "{file.path}"' "$ppsspp_win"
 CFG_CONTROLLER_FRIENDLY=yes  # restore
 
+# --- per-system emulator override -------------------------------------------
+config_set_defaults
+CFG_SYSTEM_EMULATORS="psx=retroarch:swanstation gamecube=dolphin"
+pair="$(resolve_system_emulator psx duckstation '')"
+check "override psx emulator" "retroarch" "${pair%%$'\t'*}"
+check "override psx core"     "swanstation" "${pair#*$'\t'}"
+# Override without a core keeps the system default core.
+pair2="$(resolve_system_emulator gamecube dolphin '')"
+check "override gamecube emulator" "dolphin" "${pair2%%$'\t'*}"
+# A system with no override resolves to its defaults.
+pair3="$(resolve_system_emulator snes retroarch snes9x)"
+check "no override keeps default emu" "retroarch" "${pair3%%$'\t'*}"
+check "no override keeps default core" "snes9x" "${pair3#*$'\t'}"
+# Validation: retroarch override without a core for a non-retroarch system fails.
+config_set_defaults; CFG_ROM_ROOT="/abs"; CFG_EMULATORS="retroarch dolphin"
+CFG_SYSTEM_EMULATORS="gamecube=retroarch"
+config_validate >/dev/null 2>&1 && r=0 || r=1; check_rc "validate rejects retroarch override w/o core" 1 "$r"
+CFG_SYSTEM_EMULATORS="psx=retroarch:swanstation"
+config_validate >/dev/null 2>&1 && r=0 || r=1; check_rc "validate accepts retroarch override w/ core" 0 "$r"
+CFG_SYSTEM_EMULATORS="psx=bogusemu"
+config_validate >/dev/null 2>&1 && r=0 || r=1; check_rc "validate rejects unknown override emulator" 1 "$r"
+config_set_defaults
+
 # --- pegasus_resolve_systems (auto filters by selected emulator) ------------
 config_set_defaults; CFG_EMULATORS="dolphin"; CFG_SYSTEMS="auto"
 dolphin_systems="$(pegasus_resolve_systems | sort | tr '\n' ' ')"

@@ -17,6 +17,11 @@ pre-1.0 development entries until the first tagged release.
   on how to add Pegasus to Steam for Game Mode (#16).
 
 ### Added
+- Per-system emulator overrides via the `system_emulators` config key
+  (`shortname=emulator[:core]`), so a system can target a different installed
+  emulator without editing `config/systems/*.conf`. Validated; auto-includes a
+  system when its effective emulator is selected. Makes the DuckStation →
+  SwanStation fallback a one-liner (#20).
 - `scripts/uninstall.sh` — removes generated metadata/`HOW_TO_ADD_ROMS.txt`,
   deregisters our `game_dirs.txt` entries (keeping user-added ones), and
   optionally `flatpak uninstall --user` the emulators+Pegasus (`--remove-flatpaks`).

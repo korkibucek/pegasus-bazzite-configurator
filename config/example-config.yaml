@@ -47,6 +47,13 @@ emulators:
 #   systems: snes, n64, psx, ps2, gamecube
 systems: auto
 
+# Per-system emulator overrides — change a system's emulator without editing
+# config/systems/*.conf. Format: "shortname=emulator[:core]" (the :core part is
+# for RetroArch). Space/comma list or a block sequence. Examples:
+#   system_emulators: psx=retroarch:swanstation, n64=retroarch:mupen64plus_next
+# (A system whose effective emulator is selected above is auto-included.)
+system_emulators: ""
+
 # install-missing  = only install/configure what is absent (safe, idempotent)
 # force            = overwrite existing metadata (existing files are backed up)
 mode: install-missing
