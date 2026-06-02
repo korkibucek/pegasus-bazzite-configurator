@@ -75,6 +75,28 @@ EMU_NOTE[scummvm]="ScummVM identifies games rather than running raw files. Recom
 # Stable display order for menus/summaries.
 EMU_ORDER=(retroarch dolphin pcsx2 ppsspp duckstation rpcs3 mame melonds scummvm)
 
+# --- BIOS / firmware expectations -------------------------------------------
+# Emulators that need user-supplied BIOS/firmware (which this tool NEVER
+# provides). EMU_BIOS_DIR is the Flatpak path where the files belong ({HOME} is
+# substituted at runtime); EMU_BIOS_NOTE is a short human hint. validate.sh
+# WARNs (never FAILs) when the directory is missing/empty.
+declare -gA EMU_BIOS_DIR EMU_BIOS_NOTE
+EMU_BIOS_DIR[pcsx2]="{HOME}/.var/app/net.pcsx2.PCSX2/config/PCSX2/bios"
+EMU_BIOS_NOTE[pcsx2]="PS2 BIOS (PCSX2 > Settings > BIOS)"
+EMU_BIOS_DIR[duckstation]="{HOME}/.var/app/org.duckstation.DuckStation/config/duckstation/bios"
+EMU_BIOS_NOTE[duckstation]="PS1 BIOS (DuckStation > Settings > BIOS)"
+EMU_BIOS_DIR[rpcs3]="{HOME}/.var/app/net.rpcs3.RPCS3/config/rpcs3/dev_flash"
+EMU_BIOS_NOTE[rpcs3]="PS3 firmware — RPCS3 > File > Install Firmware (populates dev_flash)"
+EMU_BIOS_DIR[retroarch]="{HOME}/.var/app/org.libretro.RetroArch/config/retroarch/system"
+EMU_BIOS_NOTE[retroarch]="core BIOS files (e.g. PS1, PC Engine CD, Neo Geo) go in RetroArch's system/ dir"
+
+# emu_bios_dir KEY -> expanded BIOS dir for KEY (or non-zero if KEY needs none).
+emu_bios_dir() {
+    local d="${EMU_BIOS_DIR[$1]:-}"
+    [[ -n "$d" ]] || return 1
+    printf '%s' "${d//\{HOME\}/$HOME}"
+}
+
 # emu_exists KEY -> 0 if the key is in the catalog.
 emu_exists() { [[ -n "${EMU_ID[$1]:-}" ]]; }
 

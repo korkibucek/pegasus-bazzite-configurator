@@ -61,6 +61,11 @@ Several emulators need files this tool will **never** supply:
 
 Use only legally obtained dumps from hardware you own.
 
+`./scripts/validate.sh` runs a **BIOS/firmware preflight**: for each selected
+emulator that needs BIOS it WARNs (never fails) when the expected directory is
+empty/missing and prints the exact path to drop your files into. It never lists
+or fetches copyrighted files.
+
 ## Caveats by emulator
 
 - **DuckStation**: its license and Flathub availability have changed over time.

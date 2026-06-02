@@ -110,6 +110,21 @@ main() {
         fi
     done
 
+    # 3b) BIOS / firmware preflight (WARN only — we never provide these files).
+    printf '\n%sBIOS / firmware%s\n' "$C_BOLD" "$C_RESET"
+    local need_bios=0 bdir
+    for k in $CFG_EMULATORS; do
+        emu_exists "$k" || continue
+        bdir="$(emu_bios_dir "$k")" || continue
+        need_bios=1
+        if [[ -d "$bdir" ]] && find "$bdir" -mindepth 1 -type f -print -quit 2>/dev/null | grep -q .; then
+            ok "${k}: BIOS/firmware present ($bdir)"
+        else
+            warn "${k}: no BIOS/firmware in $bdir — add ${EMU_BIOS_NOTE[$k]} (legally obtained dumps; none are provided)"
+        fi
+    done
+    [[ "$need_bios" == 0 ]] && ok "no selected emulator requires BIOS/firmware"
+
     # 4) ROM root + per-system metadata
     printf '\n%sROM paths & metadata%s\n' "$C_BOLD" "$C_RESET"
     if [[ -d "$CFG_ROM_ROOT" ]]; then ok "ROM root exists: $CFG_ROM_ROOT"; else bad "ROM root missing: $CFG_ROM_ROOT"; fi
