@@ -170,6 +170,14 @@ config_set_defaults; CFG_EMULATORS="dolphin"; CFG_SYSTEMS="auto"
 dolphin_systems="$(pegasus_resolve_systems | sort | tr '\n' ' ')"
 check "auto systems for dolphin" "gamecube wii " "$dolphin_systems"
 
+# --- steam_shortcuts.py binary VDF round-trip (#22) -------------------------
+if have python3; then
+    python3 "$REPO_ROOT/scripts/lib/steam_shortcuts.py" selftest >/dev/null 2>&1 && r=0 || r=1
+    check_rc "steam_shortcuts.py selftest (binary VDF round-trip)" 0 "$r"
+else
+    printf 'skip steam_shortcuts selftest (no python3)\n'
+fi
+
 # --- RetroArch core URLs (#24) ----------------------------------------------
 HOME="/home/tester"
 check "ra_core_url snes9x" "https://buildbot.libretro.com/nightly/linux/x86_64/latest/snes9x_libretro.so.zip" "$(ra_core_url snes9x)"
