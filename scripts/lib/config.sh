@@ -30,6 +30,8 @@ config_set_defaults() {
     CFG_CONTROLLER_FRIENDLY="${CFG_CONTROLLER_FRIENDLY:-yes}"
     CFG_TARGET="${CFG_TARGET:-auto}"                         # auto|gamemode|desktop
     CFG_EXTRA_ROM_PATHS="${CFG_EXTRA_ROM_PATHS:-}"           # extra mounts to grant (SD cards etc.)
+    # Per-system emulator overrides: space/comma list of "shortname=emulator[:core]"
+    CFG_SYSTEM_EMULATORS="${CFG_SYSTEM_EMULATORS:-}"
 }
 
 # ---------------------------------------------------------------------------
@@ -52,6 +54,7 @@ _yaml_key_to_cfg() {
         controller_friendly)   echo CFG_CONTROLLER_FRIENDLY ;;
         target)                echo CFG_TARGET ;;
         extra_rom_paths)       echo CFG_EXTRA_ROM_PATHS ;;
+        system_emulators)      echo CFG_SYSTEM_EMULATORS ;;
         *)                     echo "" ;;
     esac
 }
@@ -178,6 +181,24 @@ config_validate() {
         emu_exists "$k" || _cfg_err "unknown emulator '$k' (see config/example-config.yaml for valid keys)"
     done
 
+    # Validate per-system emulator overrides: "shortname=emulator[:core]".
+    local tok sn rhs emu
+    for tok in $CFG_SYSTEM_EMULATORS; do
+        if [[ "$tok" != *=* ]]; then
+            _cfg_err "system_emulators: '$tok' must be shortname=emulator[:core]"; continue
+        fi
+        sn="${tok%%=*}"; rhs="${tok#*=}"; emu="${rhs%%:*}"
+        [[ -r "$PBC_SYSTEMS_DIR/$sn.conf" ]] || _cfg_err "system_emulators: unknown system '$sn'"
+        emu_exists "$emu" || { _cfg_err "system_emulators: unknown emulator '$emu' for '$sn'"; continue; }
+        # RetroArch needs a core: from the override (sn=retroarch:core) or the
+        # system's own definition.
+        if [[ "$emu" == retroarch && "$rhs" != *:* ]]; then
+            local cconf=""
+            [[ -r "$PBC_SYSTEMS_DIR/$sn.conf" ]] && cconf="$(_sys_field "$sn" SYS_RA_CORE 2>/dev/null)"
+            [[ -n "$cconf" ]] || _cfg_err "system_emulators: '$sn=retroarch' needs a core (use '$sn=retroarch:<core>')"
+        fi
+    done
+
     (( errors == 0 )) || { log_error "$errors configuration error(s); aborting"; return 1; }
     log_ok "configuration valid"
     return 0
@@ -202,5 +223,6 @@ config_summary() {
   Controller-friendly : $CFG_CONTROLLER_FRIENDLY
   Target              : $CFG_TARGET
   Extra ROM paths     : ${CFG_EXTRA_ROM_PATHS:-（none）}
+  System overrides    : ${CFG_SYSTEM_EMULATORS:-（none）}
 EOF
 }

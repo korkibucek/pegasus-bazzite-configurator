@@ -65,8 +65,10 @@ Use only legally obtained dumps from hardware you own.
 
 - **DuckStation**: its license and Flathub availability have changed over time.
   If `flatpak install … org.duckstation.DuckStation` fails, use **SwanStation**
-  (a libretro PS1 core) via RetroArch for the `psx` system instead — change
-  `psx.conf` to `SYS_EMULATOR="retroarch"` and `SYS_RA_CORE="swanstation"`.
+  (a libretro PS1 core) via RetroArch for the `psx` system instead. Easiest way,
+  no file edits — add to your config:
+  `system_emulators: psx=retroarch:swanstation` (see PEGASUS_CONFIG.md). Or edit
+  `psx.conf` to `SYS_EMULATOR="retroarch"` / `SYS_RA_CORE="swanstation"`.
 - **MAME**: launches by ROM short-name and requires version-correct ROM sets
   matching your MAME version. The generated launch passes the rompath and base
   name; arcade is inherently fiddly.
