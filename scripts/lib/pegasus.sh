@@ -100,7 +100,11 @@ pegasus_resolve_systems() {
     if [[ "$CFG_SYSTEMS" != auto && -n "$CFG_SYSTEMS" ]]; then
         local s
         for s in $CFG_SYSTEMS; do
-            [[ -r "$PBC_SYSTEMS_DIR/$s.conf" ]] && out+=("$s") || log_warn "system '$s' has no definition in $PBC_SYSTEMS_DIR"
+            if [[ -r "$PBC_SYSTEMS_DIR/$s.conf" ]]; then
+                out+=("$s")
+            else
+                log_warn "system '$s' has no definition in $PBC_SYSTEMS_DIR"
+            fi
         done
     else
         local f sn emu
