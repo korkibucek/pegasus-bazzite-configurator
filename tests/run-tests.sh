@@ -170,6 +170,22 @@ config_set_defaults; CFG_EMULATORS="dolphin"; CFG_SYSTEMS="auto"
 dolphin_systems="$(pegasus_resolve_systems | sort | tr '\n' ' ')"
 check "auto systems for dolphin" "gamecube wii " "$dolphin_systems"
 
+# --- detect_rom_library (EmuDeck/ES-DE reuse) -------------------------------
+lib_home="$TMP/emuhome"; mkdir -p "$lib_home/Emulation/roms"
+HOME="$lib_home" detect_rom_library && r=0 || r=1
+check_rc "detect_rom_library finds ~/Emulation/roms" 0 "$r"
+check "detect_rom_library path" "$lib_home/Emulation/roms" "$PBC_ROM_LIBRARY"
+no_home="$TMP/nolib"; mkdir -p "$no_home"
+HOME="$no_home" detect_rom_library && r=0 || r=1
+check_rc "detect_rom_library absent => non-zero" 1 "$r"
+
+# --- resolve_system_dirname (folder aliases) --------------------------------
+CFG_ROM_ROOT="$TMP/lib"; mkdir -p "$CFG_ROM_ROOT/gc" "$CFG_ROM_ROOT/snes"
+check "alias: existing gc used for gamecube" "gc" "$(resolve_system_dirname gamecube gamecube)"
+check "default used when dir exists" "snes" "$(resolve_system_dirname snes snes)"
+check "fresh tree falls back to default" "psp" "$(resolve_system_dirname psp psp)"
+config_set_defaults
+
 # --- write_file always ends files with a single trailing newline ------------
 wf="$TMP/wf.txt"
 printf 'alpha\nbeta' | write_file "$wf"   # input deliberately lacks trailing \n

@@ -121,6 +121,31 @@ resolve_system_emulator() {
     printf '%s\t%s' "$emu" "$core"
 }
 
+# --- folder-name aliases (ES-DE / EmuDeck differ from our shortnames) -------
+# Our SYS_DIRNAME is the default. When reusing an existing library, prefer an
+# existing folder under a known alias so we don't create a duplicate (e.g.
+# ES-DE uses "gc" for GameCube). Resolution only ever picks a folder that
+# already exists; on a fresh tree the default is used.
+declare -gA SYS_DIR_ALIASES
+SYS_DIR_ALIASES[gamecube]="gc"
+SYS_DIR_ALIASES[megadrive]="genesis md"
+SYS_DIR_ALIASES[mastersystem]="sms"
+SYS_DIR_ALIASES[arcade]="mame fbneo"
+SYS_DIR_ALIASES[pcengine]="tg16 turbografx16 pcenginecd"
+SYS_DIR_ALIASES[psx]="ps1"
+
+# resolve_system_dirname SHORTNAME DEFAULT_DIRNAME -> the folder name to use
+# under CFG_ROM_ROOT: the default if it exists, else a known alias that exists,
+# else the default (created fresh).
+resolve_system_dirname() {
+    local sn="$1" def="$2" cand
+    [[ -d "$CFG_ROM_ROOT/$def" ]] && { printf '%s' "$def"; return 0; }
+    for cand in ${SYS_DIR_ALIASES[$sn]:-}; do
+        [[ -d "$CFG_ROM_ROOT/$cand" ]] && { printf '%s' "$cand"; return 0; }
+    done
+    printf '%s' "$def"
+}
+
 # pegasus_resolve_systems — echo the list of system shortnames to generate.
 # CFG_SYSTEMS=auto => every catalog system whose default emulator was selected.
 pegasus_resolve_systems() {
@@ -218,7 +243,9 @@ pegasus_generate() {
 
     local gamedirs=() sn
     for sn in "${systems[@]}"; do
-        pegasus_generate_system "$sn" && gamedirs+=("$CFG_ROM_ROOT/$(_sys_field "$sn" SYS_DIRNAME)")
+        if pegasus_generate_system "$sn"; then
+            gamedirs+=("$CFG_ROM_ROOT/$(resolve_system_dirname "$sn" "$(_sys_field "$sn" SYS_DIRNAME)")")
+        fi
     done
 
     pegasus_write_game_dirs "${gamedirs[@]}"
@@ -253,6 +280,14 @@ pegasus_generate_system() {
     if [[ " $CFG_EMULATORS " != *" $eff_emu "* ]]; then
         log_debug "skip $sn: emulator $eff_emu not selected"
         return 1
+    fi
+
+    # Reuse an existing library folder (e.g. ES-DE "gc") instead of creating a
+    # duplicate; falls back to the default name on a fresh tree.
+    local dirname; dirname="$(resolve_system_dirname "$sn" "$SYS_DIRNAME")"
+    if [[ "$dirname" != "$SYS_DIRNAME" ]]; then
+        log_info "$sn: using existing library folder '$dirname'"
+        dir="$CFG_ROM_ROOT/$dirname"; meta="$dir/metadata.pegasus.txt"
     fi
 
     run_cmd mkdir -p -- "$dir" || { log_error "cannot create $dir"; return 1; }

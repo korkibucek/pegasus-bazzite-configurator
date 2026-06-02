@@ -32,6 +32,8 @@ config_set_defaults() {
     CFG_EXTRA_ROM_PATHS="${CFG_EXTRA_ROM_PATHS:-}"           # extra mounts to grant (SD cards etc.)
     # Per-system emulator overrides: space/comma list of "shortname=emulator[:core]"
     CFG_SYSTEM_EMULATORS="${CFG_SYSTEM_EMULATORS:-}"
+    # Reuse a detected EmuDeck/ES-DE library as rom_root: auto|yes|no
+    CFG_REUSE_LIBRARY="${CFG_REUSE_LIBRARY:-auto}"
 }
 
 # ---------------------------------------------------------------------------
@@ -55,6 +57,7 @@ _yaml_key_to_cfg() {
         target)                echo CFG_TARGET ;;
         extra_rom_paths)       echo CFG_EXTRA_ROM_PATHS ;;
         system_emulators)      echo CFG_SYSTEM_EMULATORS ;;
+        reuse_existing_library) echo CFG_REUSE_LIBRARY ;;
         *)                     echo "" ;;
     esac
 }
@@ -169,6 +172,7 @@ config_validate() {
     case "$CFG_PEGASUS_INSTALL" in flatpak|appimage|skip) ;; *) _cfg_err "pegasus_install must be flatpak|appimage|skip (got '$CFG_PEGASUS_INSTALL')";; esac
     case "$CFG_MODE" in install-missing|force) ;; *) _cfg_err "mode must be install-missing|force (got '$CFG_MODE')";; esac
     case "$CFG_TARGET" in auto|gamemode|desktop) ;; *) _cfg_err "target must be auto|gamemode|desktop (got '$CFG_TARGET')";; esac
+    case "$CFG_REUSE_LIBRARY" in auto|yes|no) ;; *) _cfg_err "reuse_existing_library must be auto|yes|no (got '$CFG_REUSE_LIBRARY')";; esac
     _cfg_bool() { case "${1,,}" in yes|no|true|false|1|0) return 0;; *) return 1;; esac; }
     _cfg_bool "$CFG_CREATE_ROM_DIR"      || _cfg_err "create_rom_dir must be yes/no"
     _cfg_bool "$CFG_BACKUP"              || _cfg_err "backup must be yes/no"
@@ -224,5 +228,6 @@ config_summary() {
   Target              : $CFG_TARGET
   Extra ROM paths     : ${CFG_EXTRA_ROM_PATHS:-（none）}
   System overrides    : ${CFG_SYSTEM_EMULATORS:-（none）}
+  Reuse library       : $CFG_REUSE_LIBRARY
 EOF
 }
