@@ -86,10 +86,24 @@ hardware.
 ./scripts/restore.sh /path/to/backups/<timestamp>
 ```
 
-To remove an installed emulator entirely:
+To undo the whole deployment (generated config only — ROMs and media are kept):
+
+```bash
+./scripts/uninstall.sh --config <your-config> --dry-run   # preview
+./scripts/uninstall.sh --config <your-config>             # remove generated config
+./scripts/uninstall.sh --config <your-config> --remove-flatpaks   # also remove emulators+Pegasus
+```
+
+To remove a single installed emulator manually:
 
 ```bash
 flatpak uninstall --user <app-id>
+```
+
+To update the managed Flatpaks:
+
+```bash
+./scripts/update.sh --config <your-config>
 ```
 
 ## Permissions GUI
