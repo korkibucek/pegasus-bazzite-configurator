@@ -147,6 +147,13 @@ config_set_defaults; CFG_EMULATORS="dolphin"; CFG_SYSTEMS="auto"
 dolphin_systems="$(pegasus_resolve_systems | sort | tr '\n' ' ')"
 check "auto systems for dolphin" "gamecube wii " "$dolphin_systems"
 
+# --- write_file always ends files with a single trailing newline ------------
+wf="$TMP/wf.txt"
+printf 'alpha\nbeta' | write_file "$wf"   # input deliberately lacks trailing \n
+last_char="$(tail -c1 "$wf" | od -An -c | tr -d ' ')"
+check "write_file adds trailing newline" '\n' "$last_char"
+check "write_file preserves content" "alpha beta" "$(tr '\n' ' ' <"$wf" | sed 's/ $//')"
+
 # --- backup path generation -------------------------------------------------
 PBC_STATE_DIR="$TMP/state"; PBC_BACKUP_DIR=""
 backup_begin   # sets PBC_BACKUP_DIR in this shell (must NOT be called via $(...))

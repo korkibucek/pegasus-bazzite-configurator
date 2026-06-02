@@ -137,7 +137,10 @@ write_file() {
         return 0
     fi
     mkdir -p -- "$(dirname -- "$path")" || { log_error "cannot create dir for $path"; return 1; }
-    printf '%s' "$content" >"$path" || { log_error "cannot write $path"; return 1; }
+    # `content` came from $(cat), which strips trailing newlines, so add exactly
+    # one. POSIX text files (and .editorconfig) want a final newline; without it,
+    # appending to e.g. game_dirs.txt would glue onto the last line.
+    printf '%s\n' "$content" >"$path" || { log_error "cannot write $path"; return 1; }
     log_debug "wrote $path"
 }
 

@@ -103,5 +103,13 @@ YAML
         echo; echo "### 7. logging + backup code paths"
         ls -1 "$HOME/.local/share/pegasus-bazzite-configurator/logs/" >/dev/null && echo "OK: log file written"
 
+        echo; echo "### 8. lifecycle: update + uninstall dry-runs change nothing"
+        scripts/update.sh --config "$cfg" --dry-run || true
+        before="$(find "$HOME/My ROMs" -name metadata.pegasus.txt | wc -l)"
+        scripts/uninstall.sh --config "$cfg" --yes --dry-run
+        after="$(find "$HOME/My ROMs" -name metadata.pegasus.txt | wc -l)"
+        [ "$before" = "$after" ] || { echo "FAIL: uninstall dry-run removed files"; exit 1; }
+        echo "OK: lifecycle dry-runs are non-destructive ($before metadata files intact)"
+
         echo; echo "ALL SMOKE CHECKS COMPLETED"
     '

@@ -13,6 +13,19 @@ pre-1.0 development entries until the first tagged release.
   on how to add Pegasus to Steam for Game Mode (#16).
 
 ### Added
+- `scripts/uninstall.sh` — removes generated metadata/`HOW_TO_ADD_ROMS.txt`,
+  deregisters our `game_dirs.txt` entries (keeping user-added ones), and
+  optionally `flatpak uninstall --user` the emulators+Pegasus (`--remove-flatpaks`).
+  ROM files and media are never touched; everything is backed up first (#17).
+- `scripts/update.sh` — `flatpak update --user` for the configured Pegasus +
+  emulators (#17).
+
+### Fixed
+- `write_file` lost the trailing newline (content came through `$(cat)`), so
+  generated files had no final newline and appends to `game_dirs.txt` glued onto
+  the last line. Now writes exactly one trailing newline (found via #17).
+
+### Added (earlier)
 - Initial deployment engine (`scripts/deploy.sh`) with interactive and
   non-interactive (`--config`) modes, dry-run, force, logging, backup, and a
   final deployment summary.

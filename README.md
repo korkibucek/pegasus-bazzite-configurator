@@ -79,11 +79,15 @@ cp config/example-config.yaml config/local-mydeck.yaml   # edit to taste
 ./scripts/deploy.sh --config config/local-mydeck.yaml --non-interactive
 ```
 
-Undo:
+Update / undo / uninstall:
 
 ```bash
+./scripts/update.sh                  # flatpak update Pegasus + your emulators
 ./scripts/restore.sh --list          # show backups
 ./scripts/restore.sh                 # restore the most recent backup
+./scripts/uninstall.sh --dry-run     # preview removal of generated config
+./scripts/uninstall.sh               # remove generated config (ROMs preserved)
+./scripts/uninstall.sh --remove-flatpaks   # also remove the installed emulators+Pegasus
 ```
 
 ## Configuration
