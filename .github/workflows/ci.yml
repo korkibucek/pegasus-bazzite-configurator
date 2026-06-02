@@ -41,7 +41,7 @@ jobs:
         fedora: ["42", "43", "44"]
     continue-on-error: ${{ matrix.fedora != '44' }}
     container:
-      image: fedora:${{ matrix.fedora }}
+      image: registry.fedoraproject.org/fedora:${{ matrix.fedora }}
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
