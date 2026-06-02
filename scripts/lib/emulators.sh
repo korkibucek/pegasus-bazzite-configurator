@@ -72,8 +72,30 @@ EMU_ID[scummvm]="org.scummvm.ScummVM"
 EMU_LAUNCH[scummvm]='flatpak run org.scummvm.ScummVM -p "{file.dir}" -f "{file.basename}"'
 EMU_NOTE[scummvm]="ScummVM identifies games rather than running raw files. Recommended: create one .scummvm file per game containing its ScummVM game id. See docs/EMULATOR_SUPPORT.md."
 
+EMU_NAME[flycast]="Flycast (Dreamcast / NAOMI, standalone)"
+EMU_ID[flycast]="org.flycast.Flycast"
+EMU_LAUNCH[flycast]='flatpak run org.flycast.Flycast "{file.path}"'
+EMU_NOTE[flycast]="Standalone Dreamcast/NAOMI/Atomiswave. Dreamcast needs dc_boot.bin/dc_flash.bin in Flycast's data dir."
+
+EMU_NAME[cemu]="Cemu (Wii U)"
+EMU_ID[cemu]="info.cemu.Cemu"
+EMU_LAUNCH[cemu]='flatpak run info.cemu.Cemu -f -g "{file.path}"'
+EMU_LAUNCH_WINDOWED[cemu]='flatpak run info.cemu.Cemu -g "{file.path}"'
+EMU_NOTE[cemu]="Wii U. Demanding (desktop recommended). Needs your own game files/keys; folder-based titles may need adjustment."
+
+EMU_NAME[vita3k]="Vita3K (PS Vita, experimental)"
+EMU_ID[vita3k]="net.vita3k.Vita3K"
+EMU_LAUNCH[vita3k]='flatpak run net.vita3k.Vita3K "{file.path}"'
+EMU_NOTE[vita3k]="Experimental. Vita3K typically launches installed titles by ID; raw-file launch is best-effort and may need manual setup. Requires firmware."
+
+EMU_NAME[xemu]="xemu (Original Xbox)"
+EMU_ID[xemu]="app.xemu.xemu"
+EMU_LAUNCH[xemu]='flatpak run app.xemu.xemu -full-screen -dvd_path "{file.path}"'
+EMU_LAUNCH_WINDOWED[xemu]='flatpak run app.xemu.xemu -dvd_path "{file.path}"'
+EMU_NOTE[xemu]="Original Xbox. Requires your own MCPX/BIOS and a formatted HDD image, configured once in xemu. Desktop recommended."
+
 # Stable display order for menus/summaries.
-EMU_ORDER=(retroarch dolphin pcsx2 ppsspp duckstation rpcs3 mame melonds scummvm)
+EMU_ORDER=(retroarch dolphin pcsx2 ppsspp duckstation rpcs3 mame melonds scummvm flycast cemu vita3k xemu)
 
 # --- BIOS / firmware expectations -------------------------------------------
 # Emulators that need user-supplied BIOS/firmware (which this tool NEVER
