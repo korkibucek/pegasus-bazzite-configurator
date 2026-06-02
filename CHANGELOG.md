@@ -17,6 +17,9 @@ pre-1.0 development entries until the first tagged release.
   on how to add Pegasus to Steam for Game Mode (#16).
 
 ### Added
+- `CONTRIBUTING.md` — developer guide: repo layout, local dev gate, how to add a
+  system/emulator, branch/PR conventions, and the hardware-validation boundary;
+  linked from README (#38).
 - RetroArch core-presence check in `validate.sh` (#40): per configured RetroArch
   system, WARNs (never fails) when its `<core>_libretro.so` is missing, with the
   exact path and the install command — catching the common "Failed to load core".

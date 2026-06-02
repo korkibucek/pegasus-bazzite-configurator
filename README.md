@@ -151,6 +151,10 @@ behaviour — those need a real Bazzite machine. See
 - [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) — common Bazzite/Pegasus/Flatpak problems
 - [docs/TESTING.md](docs/TESTING.md) — what the container test proves and what it doesn't
 
+Contributing? See [CONTRIBUTING.md](CONTRIBUTING.md) for the dev gate (`make
+check` / `make smoke-fedora`), how to add a system or emulator, and branch/PR
+conventions.
+
 ## Known limitations
 
 - Final runtime validation (actually launching games) requires a real Bazzite
