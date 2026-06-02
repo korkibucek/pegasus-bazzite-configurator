@@ -17,6 +17,11 @@ pre-1.0 development entries until the first tagged release.
   on how to add Pegasus to Steam for Game Mode (#16).
 
 ### Added
+- EmuDeck / ES-DE library reuse (#21): detects an existing `~/Emulation/roms`
+  (incl. SD cards) and can adopt it as `rom_root` (`reuse_existing_library:
+  auto|yes|no`). Reconciles differing folder names via an alias map (e.g. ES-DE
+  `gc` for GameCube) so metadata is written into existing folders rather than
+  duplicates. ROMs are never moved/deleted.
 - Per-system emulator overrides via the `system_emulators` config key
   (`shortname=emulator[:core]`), so a system can target a different installed
   emulator without editing `config/systems/*.conf`. Validated; auto-includes a

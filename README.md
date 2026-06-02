@@ -105,6 +105,8 @@ Highlights:
 | `mode` | `install-missing` | `install-missing` \| `force` (overwrite) |
 | `backup` | `yes` | Back up before overwriting |
 | `extra_rom_paths` | (none) | Extra mounts/SD cards to grant emulators |
+| `reuse_existing_library` | `auto` | Adopt a detected EmuDeck/ES-DE library as `rom_root` |
+| `system_emulators` | (none) | Override a system's emulator, e.g. `psx=retroarch:swanstation` |
 
 CLI flags override the config file (`--force`, `--dry-run`, `--non-interactive`,
 `--allow-non-bazzite`, `--quiet`, `--verbose`). Run `./scripts/deploy.sh --help`.

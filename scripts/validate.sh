@@ -119,7 +119,7 @@ main() {
     fi
     local sn dir meta
     for sn in "${systems[@]}"; do
-        dir="$CFG_ROM_ROOT/$(_sys_field "$sn" SYS_DIRNAME)"
+        dir="$CFG_ROM_ROOT/$(resolve_system_dirname "$sn" "$(_sys_field "$sn" SYS_DIRNAME)")"
         meta="$dir/metadata.pegasus.txt"
         if [[ -f "$meta" ]]; then
             validate_metadata_file "$sn" "$meta"

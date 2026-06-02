@@ -79,6 +79,24 @@ inside its sandbox. The tool:
 If you install Pegasus as a native binary/AppImage instead, no prefix is needed
 (launch lines are plain `flatpak run …`).
 
+## Reusing an existing EmuDeck / ES-DE library
+
+Many Bazzite users already run EmuDeck, which stores ROMs under `~/Emulation/roms`
+(or the same path on an SD card). The tool detects this and, rather than creating
+a parallel `~/ROMs` tree, can adopt it as `rom_root`:
+
+- **Interactive**: the detected library becomes the default in the ROM-root
+  prompt (confirm or change it).
+- **Non-interactive**: set `reuse_existing_library: yes` to opt in (default
+  `auto` does not adopt unattended, to avoid surprises).
+
+Folder names are reconciled with ES-DE where they differ — e.g. ES-DE uses `gc`
+for GameCube, so metadata is written into the existing `gc` folder instead of a
+new `gamecube` one (see the alias map in `scripts/lib/pegasus.sh`). **ROM files
+are never moved or deleted** — only `metadata.pegasus.txt` is written and
+directories registered with Pegasus. If a system has no matching folder, a fresh
+one is created (an empty collection) and reported in the log.
+
 ## Game Mode vs Desktop Mode
 
 - **Desktop Mode**: launch Pegasus like any app (`flatpak run
