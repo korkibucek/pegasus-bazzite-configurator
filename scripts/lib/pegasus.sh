@@ -251,6 +251,17 @@ pegasus_generate() {
     pegasus_write_game_dirs "${gamedirs[@]}"
 }
 
+# pegasus_systems_list — print the system catalog (for `deploy.sh --list-systems`).
+pegasus_systems_list() {
+    printf '%-14s %-40s %-12s %s\n' "SHORTNAME" "SYSTEM" "EMULATOR" "EXTENSIONS"
+    local f
+    for f in "$PBC_SYSTEMS_DIR"/*.conf; do
+        [[ -r "$f" ]] || continue
+        # shellcheck disable=SC1090  # data file path is dynamic by design
+        ( . "$f"; printf '%-14s %-40s %-12s %s\n' "$SYS_SHORTNAME" "$SYS_NAME" "$SYS_EMULATOR" "$SYS_EXTENSIONS" )
+    done
+}
+
 # _sys_field SHORTNAME FIELD — read one field from a system conf in a subshell.
 _sys_field() {
     local sn="$1" field="$2"

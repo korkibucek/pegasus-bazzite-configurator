@@ -82,6 +82,9 @@ cp config/example-config.yaml config/local-mydeck.yaml   # edit to taste
 Update / undo / uninstall:
 
 ```bash
+./scripts/deploy.sh --list-emulators # show the supported emulator catalog
+./scripts/deploy.sh --list-systems   # show the supported system catalog
+./scripts/deploy.sh --repair --config <cfg>   # re-apply ROM sandbox permissions only
 ./scripts/update.sh                  # flatpak update Pegasus + your emulators
 ./scripts/restore.sh --list          # show backups
 ./scripts/restore.sh                 # restore the most recent backup

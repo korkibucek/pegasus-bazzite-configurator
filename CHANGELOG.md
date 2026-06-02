@@ -17,6 +17,10 @@ pre-1.0 development entries until the first tagged release.
   on how to add Pegasus to Steam for Game Mode (#16).
 
 ### Added
+- Operational flags (#26): `deploy.sh --repair` re-applies only the Flatpak
+  sandbox permissions (ROM `--filesystem` access + Pegasus host-spawn), and
+  `--list-emulators` / `--list-systems` print the catalogs. List output is
+  SIGPIPE-safe (pipe to `head`/`grep` without errors).
 - BIOS/firmware preflight in `validate.sh` (#23): WARNs (never fails) per
   selected emulator when the expected BIOS directory is empty/missing, printing
   the exact target path and a hint. Never lists or fetches copyrighted files.
