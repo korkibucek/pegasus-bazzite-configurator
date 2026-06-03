@@ -23,6 +23,14 @@ pre-1.0 development entries until the first tagged release.
   on how to add Pegasus to Steam for Game Mode (#16).
 
 ### Added
+- `scripts/autoscraper.sh` (#56) — scrape box art + metadata for your Pegasus
+  collections with Skyscraper, built/run in an isolated Podman container
+  (Bazzite-friendly; nothing layered onto the host). Contributed by @korkibucek,
+  then brought to project standards: `#!/usr/bin/env bash` + strict mode, lib
+  logging/colors/prompts, `--config`/`--roms`/`--system`/`--user`/`--rebuild`/
+  `--dry-run`/`-y`/`--help`, dry-run-aware podman, no hardcoded ROM path (defaults
+  to the config/EmuDeck library/`$HOME/ROMs`). Documented in docs/SCRAPING.md;
+  added to lint + smoke coverage.
 - Vita3K (PS Vita) support via its **official AppImage** (#54): Vita3K isn't on
   Flathub, so it's now installed by downloading `Vita3K-<arch>.AppImage` (HTTPS,
   ELF-verified, `chmod +x`) to `~/Applications/`. Adds a general AppImage-backed

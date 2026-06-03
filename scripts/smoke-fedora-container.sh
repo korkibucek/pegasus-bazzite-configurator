@@ -148,5 +148,12 @@ YAML
             echo "SKIP: no python3 in this minimal image (the Steam helper needs python3, present on real Bazzite)"
         fi
 
+        echo; echo "### 11. autoscraper --help + dry-run (no podman needed)"
+        scripts/autoscraper.sh --help >/dev/null || { echo "FAIL: autoscraper --help"; exit 1; }
+        mkdir -p "$HOME/scrape-roms/snes" "$HOME/scrape-roms/psx"
+        scripts/autoscraper.sh --roms "$HOME/scrape-roms" --system all --dry-run -y | tee /tmp/smoke-scrape.log
+        grep -q "podman run" /tmp/smoke-scrape.log || { echo "FAIL: autoscraper dry-run did not preview podman commands"; exit 1; }
+        echo "OK: autoscraper help + dry-run work without podman"
+
         echo; echo "ALL SMOKE CHECKS COMPLETED"
     '

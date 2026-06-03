@@ -73,6 +73,10 @@ By default place assets under `<system>/media/<rom-basename>/`, e.g.
 system. You can extend metadata with explicit per-game asset lines later — see
 the [Pegasus metadata docs](https://pegasus-frontend.org/docs/user-guide/meta-files/).
 
+To fetch artwork + richer metadata automatically, run
+[`scripts/autoscraper.sh`](../scripts/autoscraper.sh) (Skyscraper via Podman) —
+see [docs/SCRAPING.md](SCRAPING.md).
+
 ## ROM directory layout
 
 ```
