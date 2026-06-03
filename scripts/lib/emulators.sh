@@ -24,7 +24,7 @@
 #                 controller_friendly=no. If absent, EMU_LAUNCH is used.
 #                 EMU_LAUNCH itself IS the controller-friendly form (fullscreen /
 #                 batch / no-GUI where applicable).
-declare -gA EMU_NAME EMU_ID EMU_LAUNCH EMU_NOTE EMU_LAUNCH_WINDOWED
+declare -gA EMU_NAME EMU_ID EMU_LAUNCH EMU_NOTE EMU_LAUNCH_WINDOWED EMU_UNAVAILABLE
 
 EMU_NAME[retroarch]="RetroArch (multi-system)"
 EMU_ID[retroarch]="org.libretro.RetroArch"
@@ -83,10 +83,14 @@ EMU_LAUNCH[cemu]='flatpak run info.cemu.Cemu -f -g "{file.path}"'
 EMU_LAUNCH_WINDOWED[cemu]='flatpak run info.cemu.Cemu -g "{file.path}"'
 EMU_NOTE[cemu]="Wii U. Demanding (desktop recommended). Needs your own game files/keys; folder-based titles may need adjustment."
 
-EMU_NAME[vita3k]="Vita3K (PS Vita, experimental)"
+# PS Vita (Vita3K) is NOT published on Flathub (only its own GitHub/AppImage
+# builds), so it cannot be installed by this Flatpak flow (issue #50). It is kept
+# recognised (so existing configs that list `vita3k` still validate) but marked
+# UNAVAILABLE: the installer skips it with a warning instead of failing, and it
+# is omitted from EMU_ORDER so it is never offered to new users.
+EMU_NAME[vita3k]="Vita3K (PS Vita)"
 EMU_ID[vita3k]="net.vita3k.Vita3K"
-EMU_LAUNCH[vita3k]='flatpak run net.vita3k.Vita3K "{file.path}"'
-EMU_NOTE[vita3k]="Experimental. Vita3K typically launches installed titles by ID; raw-file launch is best-effort and may need manual setup. Requires firmware."
+EMU_UNAVAILABLE[vita3k]="not published on Flathub — install the Vita3K AppImage manually if you want it"
 
 EMU_NAME[xemu]="xemu (Original Xbox)"
 EMU_ID[xemu]="app.xemu.xemu"
@@ -95,7 +99,7 @@ EMU_LAUNCH_WINDOWED[xemu]='flatpak run app.xemu.xemu -dvd_path "{file.path}"'
 EMU_NOTE[xemu]="Original Xbox. Requires your own MCPX/BIOS and a formatted HDD image, configured once in xemu. Desktop recommended."
 
 # Stable display order for menus/summaries.
-EMU_ORDER=(retroarch dolphin pcsx2 ppsspp duckstation rpcs3 mame melonds scummvm flycast cemu vita3k xemu)
+EMU_ORDER=(retroarch dolphin pcsx2 ppsspp duckstation rpcs3 mame melonds scummvm flycast cemu xemu)
 
 # --- BIOS / firmware expectations -------------------------------------------
 # Emulators that need user-supplied BIOS/firmware (which this tool NEVER
@@ -188,6 +192,12 @@ flathub_user_remote_present() {
 # emu_install KEY — install one emulator Flatpak (idempotent).
 emu_install() {
     local k="$1" id="${EMU_ID[$1]}"
+    # Known-unavailable on Flathub (e.g. Vita3K): skip gracefully, do NOT error.
+    if [[ -n "${EMU_UNAVAILABLE[$k]:-}" ]]; then
+        log_warn "${EMU_NAME[$k]}: ${EMU_UNAVAILABLE[$k]} — skipping (not an error)"
+        PBC_EMU_UNAVAILABLE+=("$k")
+        return 0
+    fi
     if emu_installed "$k"; then
         log_ok "${EMU_NAME[$k]}: already installed — skipping"
         PBC_EMU_SKIPPED+=("$k")
@@ -223,13 +233,15 @@ emu_install_selected() {
     local list="$1"; shift
     local rom_root="$1"; shift
     local extra=("$@")
-    declare -ga PBC_EMU_INSTALLED=() PBC_EMU_SKIPPED=() PBC_EMU_FAILED=()
+    declare -ga PBC_EMU_INSTALLED=() PBC_EMU_SKIPPED=() PBC_EMU_FAILED=() PBC_EMU_UNAVAILABLE=()
     [[ -z "${list// }" ]] && { log_warn "no emulators selected"; return 0; }
     ensure_flathub || return 1
     local k
     for k in $list; do
         emu_exists "$k" || { log_warn "unknown emulator '$k' — skipping"; continue; }
         emu_install "$k" || continue
+        # Nothing to grant for emulators we didn't install (unavailable on Flathub).
+        [[ -n "${EMU_UNAVAILABLE[$k]:-}" ]] && continue
         emu_grant_rom_access "$k" "$rom_root" "${extra[@]}"
     done
 }

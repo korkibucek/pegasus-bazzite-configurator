@@ -34,8 +34,8 @@ pre-1.0 development entries until the first tagged release.
   buildbot (HTTPS, host pinned). Each download is validated as a real ZIP before
   extraction and never executed; existing cores are kept unless `--force` (and
   backed up). Dry-run lists cores + URLs and downloads nothing.
-- Expanded catalog (#25): emulators Flycast, Cemu, Vita3K, xemu; systems
-  saturn, neogeo, lynx, wonderswan, c64, amiga (RetroArch cores) plus wiiu, vita,
+- Expanded catalog (#25): emulators Flycast, Cemu, xemu; systems
+  saturn, neogeo, lynx, wonderswan, c64, amiga (RetroArch cores) plus wiiu,
   xbox (standalone). ES-DE folder aliases added (e.g. `atarilynx`). New systems
   auto-include when their emulator is selected.
 - Operational flags (#26): `deploy.sh --repair` re-applies only the Flatpak
@@ -63,6 +63,9 @@ pre-1.0 development entries until the first tagged release.
   emulators (#17).
 
 ### Fixed
+- Removed Vita3K/`vita` from the catalog — it is **not on Flathub** (only its own
+  GitHub/AppImage builds), so its install always failed and left the run in an
+  error state. PS Vita is now documented as unsupported by the Flatpak flow (#50).
 - `pegasus_install: skip` now still configures an already-installed Pegasus
   flatpak — sets the `flatpak-spawn --host` launch prefix and grants ROM
   `--filesystem` access (without installing) so the generated config works for

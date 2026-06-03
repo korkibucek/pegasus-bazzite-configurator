@@ -20,17 +20,19 @@ filesystem access to your ROM root. Catalog lives in
 | `scummvm` | ScummVM | `org.scummvm.ScummVM` | Adventure games | `-p "{file.dir}" -f "{file.basename}"` |
 | `flycast` | Flycast | `org.flycast.Flycast` | Dreamcast / NAOMI (standalone) | `"{file.path}"` |
 | `cemu` | Cemu | `info.cemu.Cemu` | Wii U *(desktop-recommended)* | `-f -g "{file.path}"` |
-| `vita3k` | Vita3K | `net.vita3k.Vita3K` | PS Vita *(experimental)* | `"{file.path}"` |
 | `xemu` | xemu | `app.xemu.xemu` | Original Xbox *(desktop-recommended)* | `-full-screen -dvd_path "{file.path}"` |
 
 Additional systems shipped in `config/systems/`: **saturn** (RetroArch
 `mednafen_saturn`), **neogeo** (`fbneo`), **lynx** (`handy`), **wonderswan**
 (`mednafen_wswan`), **c64** (`vice_x64sc`), **amiga** (`puae`), plus **wiiu**
-(Cemu), **vita** (Vita3K) and **xbox** (xemu). The RetroArch ones auto-include
-when RetroArch is selected; the standalone ones only when their emulator is
-selected. Saturn/Neo Geo/Amiga and the standalone systems need their own
-BIOS/firmware/keys (none are provided). Vita3K is experimental and may need
-manual per-title setup.
+(Cemu) and **xbox** (xemu). The RetroArch ones auto-include when RetroArch is
+selected; the standalone ones only when their emulator is selected. Saturn/Neo
+Geo/Amiga and the standalone systems need their own BIOS/firmware/keys (none are
+provided).
+
+> **PS Vita is not supported by this tool.** Vita3K is not published on Flathub
+> (only via its own GitHub/AppImage builds), so it cannot be installed through
+> the Flatpak flow. If you want it, install the Vita3K AppImage yourself.
 
 When Pegasus is a Flatpak, every launch line is additionally prefixed with
 `flatpak-spawn --host ` so the sandboxed Pegasus can start the host Flatpak.
