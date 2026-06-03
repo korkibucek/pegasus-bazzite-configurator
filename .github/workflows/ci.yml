@@ -17,7 +17,7 @@ jobs:
       - name: Install ShellCheck
         run: sudo apt-get update && sudo apt-get install -y shellcheck
       - name: Lint entrypoints (follows sources into lib/)
-        run: shellcheck -x scripts/deploy.sh scripts/validate.sh scripts/restore.sh scripts/uninstall.sh scripts/update.sh scripts/install-cores.sh scripts/add-to-steam.sh scripts/autoscraper.sh scripts/smoke-fedora-container.sh tests/run-tests.sh
+        run: shellcheck -x scripts/deploy.sh scripts/validate.sh scripts/restore.sh scripts/uninstall.sh scripts/update.sh scripts/install-cores.sh scripts/add-to-steam.sh scripts/autoscraper.sh scripts/cleanup.sh scripts/smoke-fedora-container.sh tests/run-tests.sh
       - name: Lint library modules directly
         run: shellcheck -x scripts/lib/*.sh
       - name: Byte-compile Python helper

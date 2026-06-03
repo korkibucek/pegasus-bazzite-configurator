@@ -155,5 +155,14 @@ YAML
         grep -q "podman run" /tmp/smoke-scrape.log || { echo "FAIL: autoscraper dry-run did not preview podman commands"; exit 1; }
         echo "OK: autoscraper help + dry-run work without podman"
 
+        echo; echo "### 12. cleanup --help + dry-run re-syncs extensions (no writes)"
+        scripts/cleanup.sh --help >/dev/null || { echo "FAIL: cleanup --help"; exit 1; }
+        mkdir -p "$HOME/clean-roms/psx"
+        printf "collection: Sony PlayStation\nshortname: psx\nlaunch: x \"{file.path}\"\nextensions: cue, bin, chd, pbp, m3u, img, ecm\n" > "$HOME/clean-roms/psx/metadata.pegasus.txt"
+        scripts/cleanup.sh --roms "$HOME/clean-roms" --system psx -y --dry-run | tee /tmp/smoke-clean.log
+        grep -qi "cue, chd, pbp, m3u, ecm" /tmp/smoke-clean.log || { echo "FAIL: cleanup did not preview corrected extensions"; exit 1; }
+        grep -q "bin" "$HOME/clean-roms/psx/metadata.pegasus.txt" || { echo "FAIL: dry-run modified the file"; exit 1; }
+        echo "OK: cleanup help + dry-run work and are non-destructive"
+
         echo; echo "ALL SMOKE CHECKS COMPLETED"
     '

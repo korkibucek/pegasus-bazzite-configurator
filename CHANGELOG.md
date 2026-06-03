@@ -23,6 +23,14 @@ pre-1.0 development entries until the first tagged release.
   on how to add Pegasus to Steam for Game Mode (#16).
 
 ### Added
+- `scripts/cleanup.sh` (#64) — tidy the Pegasus library without deleting data:
+  re-syncs each system's collection `extensions:` line to the catalog so
+  multi-track disc files (e.g. PS1 `.cue`+`.bin` audio tracks) are no longer
+  listed as duplicate games. Backs up before changing, `--config`/`--roms`/
+  `--system`/`--dry-run`/`-y`, preserves launch commands + scraped entries/art,
+  and never touches ROMs/media. Also: `psx` extensions no longer include
+  `bin`/`img` (they are tracks referenced by the `.cue`); `megadrive` keeps `bin`
+  (a whole cartridge ROM).
 - `scripts/autoscraper.sh` (#56) — scrape box art + metadata for your Pegasus
   collections with Skyscraper, built/run in an isolated Podman container
   (Bazzite-friendly; nothing layered onto the host). Contributed by @korkibucek,
