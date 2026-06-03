@@ -318,6 +318,22 @@ pegasus_install >/dev/null 2>&1
 check "skip+no-flatpak leaves prefix empty" "" "$LAUNCH_PREFIX"
 unset -f flatpak; DRY_RUN=0; config_set_defaults
 
+# --- #64: disc-track extensions + cleanup.sh --------------------------------
+# psx must NOT list bin/img (they are disc tracks referenced by the .cue);
+# megadrive MUST keep bin (it is a whole cartridge ROM).
+psx_ext="$(_sys_field psx SYS_EXTENSIONS)"
+if [[ "$psx_ext" == *bin* ]]; then check "psx excludes bin" "no-bin" "HAS-bin"; else check "psx excludes bin" "no-bin" "no-bin"; fi
+if [[ "$psx_ext" == *img* ]]; then check "psx excludes img" "no-img" "HAS-img"; else check "psx excludes img" "no-img" "no-img"; fi
+check_contains "megadrive keeps bin (cartridge)" "$(_sys_field megadrive SYS_EXTENSIONS)" "bin"
+# cleanup.sh re-syncs the extensions line, preserving everything else.
+cl="$TMP/cleanroms/psx"; mkdir -p "$cl"
+printf 'collection: Sony PlayStation\nshortname: psx\nlaunch: x "{file.path}"\nextensions: cue, bin, chd, pbp, m3u, img, ecm\n\ngame: Tomb Raider\nfile: /x/Tomb Raider.cue\n' > "$cl/metadata.pegasus.txt"
+HOME="$TMP/cleanhome" "$REPO_ROOT/scripts/cleanup.sh" --roms "$TMP/cleanroms" --system psx -y >/dev/null 2>&1
+new_ext="$(grep '^extensions:' "$cl/metadata.pegasus.txt")"
+check "cleanup removes bin/img from extensions" "extensions: cue, chd, pbp, m3u, ecm" "$new_ext"
+grep -q '^game: Tomb Raider' "$cl/metadata.pegasus.txt" && r=0 || r=1
+check_rc "cleanup preserves scraped game entries" 0 "$r"
+
 # --- summary ----------------------------------------------------------------
 printf '\n%d passed, %d failed\n' "$PASS" "$FAIL"
 [[ "$FAIL" -eq 0 ]]

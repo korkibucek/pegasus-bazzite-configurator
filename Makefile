@@ -3,7 +3,7 @@
 # Bazzite machine. See docs/ for what each test proves.
 
 SHELL := /bin/bash
-SCRIPTS := scripts/deploy.sh scripts/validate.sh scripts/restore.sh scripts/uninstall.sh scripts/update.sh scripts/install-cores.sh scripts/add-to-steam.sh scripts/autoscraper.sh scripts/smoke-fedora-container.sh
+SCRIPTS := scripts/deploy.sh scripts/validate.sh scripts/restore.sh scripts/uninstall.sh scripts/update.sh scripts/install-cores.sh scripts/add-to-steam.sh scripts/autoscraper.sh scripts/cleanup.sh scripts/smoke-fedora-container.sh
 LIBS := $(wildcard scripts/lib/*.sh)
 TESTS := $(wildcard tests/*.sh)
 # Lint the entrypoints (and tests/smoke) only: external-sources follows their

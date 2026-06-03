@@ -71,6 +71,25 @@ cores also need BIOS files in
   `metadata.pegasus.txt`.
 - Restart Pegasus so it rescans.
 
+## Too many duplicate games / disc tracks (.bin) listed
+
+A multi-track disc (common for PS1) is one `.cue` plus many redbook-audio
+`.bin` track files — so if the collection's `extensions:` includes `bin`,
+Pegasus lists every track as a separate "game" (e.g. ~50 Tomb Raider entries).
+The fix is to stop Pegasus *discovering* the track files; the `.bin` files must
+stay on disk because the `.cue` references them.
+
+```bash
+./scripts/cleanup.sh --config <your-config>      # all systems (add --dry-run to preview)
+./scripts/cleanup.sh --roms ~/ROMs --system psx  # just one
+```
+
+`cleanup.sh` re-syncs each system's `extensions:` line to the catalog (which
+excludes track-only formats like `bin`/`img` for disc systems), backs up the
+metadata first, and **never deletes ROMs or media**. It preserves your launch
+command and any scraped game entries/artwork. Restart Pegasus afterward.
+(Cartridge systems like Mega Drive keep `bin` — there it's a whole ROM.)
+
 ## "not detected as Bazzite"
 
 The tool refuses non-Bazzite targets by default. On other Fedora Atomic systems

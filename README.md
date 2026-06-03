@@ -86,6 +86,7 @@ Update / undo / uninstall:
 ./scripts/deploy.sh --list-systems   # show the supported system catalog
 ./scripts/deploy.sh --repair --config <cfg>   # re-apply ROM sandbox permissions only
 ./scripts/autoscraper.sh             # scrape box art + metadata (Skyscraper via Podman)
+./scripts/cleanup.sh                 # hide disc-track/dupe files from Pegasus (keeps ROMs)
 ./scripts/add-to-steam.sh            # opt-in: add Pegasus to Steam for Game Mode
 ./scripts/install-cores.sh --config <cfg> --force   # (re)install RetroArch cores manually
 ./scripts/update.sh                  # flatpak update Pegasus + your emulators
