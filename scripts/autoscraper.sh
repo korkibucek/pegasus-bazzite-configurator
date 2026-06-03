@@ -210,16 +210,26 @@ main() {
     fi
 
     log_info "Systems to scrape: ${systems[*]}"
-    local sys
+    local sys ok=() failed=()
     for sys in "${systems[@]}"; do
-        scrape_system "$sys" "$ROM_DIR" "${auth[@]}"
+        # Non-fatal per system: one failure (e.g. empty cache for a system you
+        # haven't gathered yet) must not abort the whole batch (#62).
+        if scrape_system "$sys" "$ROM_DIR" "${auth[@]}"; then
+            ok+=("$sys")
+        else
+            failed+=("$sys")
+            log_warn "scrape failed for '$sys' — continuing with the rest"
+        fi
     done
 
     log_step "Done"
-    log_ok "Scraping complete for: ${systems[*]}"
+    log_ok "Scraped: ${ok[*]:-（none）}"
+    [[ ${#failed[@]} -gt 0 ]] && log_warn "Failed/skipped: ${failed[*]} (e.g. no cache yet — gather them first, without --generate-only)"
     log_info "Launch Pegasus to see the updated artwork/metadata."
     is_dry_run && printf '\n%sThis was a DRY RUN — nothing was built, scraped, or written.%s\n' "$C_YELLOW" "$C_RESET"
-    return 0
+    # Exit non-zero only if nothing succeeded (i.e. every system failed).
+    if [[ ${#failed[@]} -eq 0 || ${#ok[@]} -gt 0 ]]; then return 0; fi
+    return 1
 }
 
 main "$@"
