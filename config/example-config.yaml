@@ -74,6 +74,13 @@ example_collections: yes
 # Apply controller-friendly launch defaults (batch/fullscreen flags). yes|no
 controller_friendly: yes
 
+# Download the libretro cores your RetroArch systems need, as part of deploy.
+# yes  - fetch them from the official libretro buildbot (HTTPS, validated zips)
+# no   - skip; install them yourself via RetroArch > Online Updater, or later
+#        with scripts/install-cores.sh
+# Only acts when RetroArch is among the selected emulators.
+install_cores: yes
+
 # auto | gamemode | desktop. "auto" picks gamemode on detected handhelds.
 target: auto
 

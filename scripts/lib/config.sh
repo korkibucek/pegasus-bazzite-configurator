@@ -34,6 +34,8 @@ config_set_defaults() {
     CFG_SYSTEM_EMULATORS="${CFG_SYSTEM_EMULATORS:-}"
     # Reuse a detected EmuDeck/ES-DE library as rom_root: auto|yes|no
     CFG_REUSE_LIBRARY="${CFG_REUSE_LIBRARY:-auto}"
+    # Download the libretro cores RetroArch systems need during deploy: yes|no
+    CFG_INSTALL_CORES="${CFG_INSTALL_CORES:-yes}"
 }
 
 # ---------------------------------------------------------------------------
@@ -58,6 +60,7 @@ _yaml_key_to_cfg() {
         extra_rom_paths)       echo CFG_EXTRA_ROM_PATHS ;;
         system_emulators)      echo CFG_SYSTEM_EMULATORS ;;
         reuse_existing_library) echo CFG_REUSE_LIBRARY ;;
+        install_cores)         echo CFG_INSTALL_CORES ;;
         *)                     echo "" ;;
     esac
 }
@@ -162,6 +165,10 @@ config_interactive() {
     ask_yes_no "Back up existing Pegasus config before changes?" Y && CFG_BACKUP=yes || CFG_BACKUP=no
     ask_yes_no "Create example collections for systems with no ROMs yet?" Y && CFG_EXAMPLE_COLLECTIONS=yes || CFG_EXAMPLE_COLLECTIONS=no
     ask_yes_no "Apply controller-friendly emulator launch defaults?" Y && CFG_CONTROLLER_FRIENDLY=yes || CFG_CONTROLLER_FRIENDLY=no
+    if [[ " $CFG_EMULATORS " == *" retroarch "* ]]; then
+        ask_yes_no "Download the RetroArch cores your systems need (third-party binaries from the libretro buildbot)?" Y \
+            && CFG_INSTALL_CORES=yes || CFG_INSTALL_CORES=no
+    fi
 
     local extra; extra="$(ask "Extra ROM paths to grant emulators (e.g. SD card mount), space-separated, or blank" "$CFG_EXTRA_ROM_PATHS")"
     CFG_EXTRA_ROM_PATHS="$extra"
@@ -188,6 +195,7 @@ config_validate() {
     _cfg_bool "$CFG_BACKUP"              || _cfg_err "backup must be yes/no"
     _cfg_bool "$CFG_EXAMPLE_COLLECTIONS" || _cfg_err "example_collections must be yes/no"
     _cfg_bool "$CFG_CONTROLLER_FRIENDLY" || _cfg_err "controller_friendly must be yes/no"
+    _cfg_bool "$CFG_INSTALL_CORES"       || _cfg_err "install_cores must be yes/no"
 
     # Validate every selected emulator key against the catalog.
     local k
@@ -239,5 +247,6 @@ config_summary() {
   Extra ROM paths     : ${CFG_EXTRA_ROM_PATHS:-（none）}
   System overrides    : ${CFG_SYSTEM_EMULATORS:-（none）}
   Reuse library       : $CFG_REUSE_LIBRARY
+  Install RA cores    : $CFG_INSTALL_CORES
 EOF
 }

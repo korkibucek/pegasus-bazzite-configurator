@@ -7,6 +7,12 @@ pre-1.0 development entries until the first tagged release.
 ## [Unreleased]
 
 ### Changed
+- RetroArch core installation is now built into `deploy.sh` via the
+  `install_cores` config option (default `yes`): once RetroArch is installed,
+  deploy fetches the cores the configured systems need. Logic extracted to a
+  shared `scripts/lib/cores.sh` used by both `deploy.sh` and the standalone
+  `install-cores.sh`. Dry-run previews cores/URLs; downloads are skipped unless
+  RetroArch is present (#52).
 - Test/CI hardening (#27): smoke harness defaults to **Fedora 44** (Bazzite 44's
   base) and accepts any image via `PBC_SMOKE_IMAGE` / a full image ref (so a
   trusted Bazzite image can be used); CI runs the smoke suite across a Fedora

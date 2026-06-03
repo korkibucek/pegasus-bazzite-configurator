@@ -35,9 +35,12 @@ source "$LIB_DIR/config.sh"
 source "$LIB_DIR/backup.sh"
 # shellcheck source=scripts/lib/pegasus.sh
 source "$LIB_DIR/pegasus.sh"
+# shellcheck source=scripts/lib/cores.sh
+source "$LIB_DIR/cores.sh"
 
 # --- summary accumulators ---------------------------------------------------
 declare -a PBC_OUTSTANDING=() PBC_SYSTEMS_WRITTEN=() PBC_SYSTEMS_SKIPPED=()
+declare -a PBC_CORES_OK=() PBC_CORES_FAILED=()
 PBC_PEGASUS_INSTALLED=0
 
 usage() {
@@ -166,6 +169,12 @@ main() {
     # shellcheck disable=SC2086
     emu_install_selected "$CFG_EMULATORS" "$CFG_ROM_ROOT" $CFG_EXTRA_ROM_PATHS \
         || log_error "Emulator install step reported a problem"
+    # Install the libretro cores the configured RetroArch systems need, when
+    # enabled and RetroArch is present (preview in dry-run). Core download
+    # failures are non-fatal — the user can re-run scripts/install-cores.sh.
+    if cfg_is_yes "$CFG_INSTALL_CORES" && { emu_installed retroarch || is_dry_run; }; then
+        cores_install 0 || log_warn "some RetroArch cores did not download — re-run: scripts/install-cores.sh${CONFIG_FILE:+ --config $CONFIG_FILE}"
+    fi
     pegasus_generate    || log_error "Config generation reported a problem"
     backup_finalize
 
@@ -251,6 +260,7 @@ ${C_BOLD}Emulators${C_RESET}      :
   already present: ${PBC_EMU_SKIPPED[*]:-（none）}
   unavailable    : ${PBC_EMU_UNAVAILABLE[*]:-（none）}
   failed         : ${PBC_EMU_FAILED[*]:-（none）}
+${C_BOLD}RetroArch cores${C_RESET}: installed ${#PBC_CORES_OK[@]}, failed ${#PBC_CORES_FAILED[@]} (install_cores=$CFG_INSTALL_CORES)
 ${C_BOLD}Systems${C_RESET}        :
   written        : ${PBC_SYSTEMS_WRITTEN[*]:-（none）}
   left untouched : ${PBC_SYSTEMS_SKIPPED[*]:-（none）}
@@ -264,9 +274,9 @@ EOF
         printf '\n%sOutstanding user actions:%s\n' "$C_YELLOW" "$C_RESET"
         local a; for a in "${PBC_OUTSTANDING[@]}"; do printf '  • %s\n' "$a"; done
     fi
-    # Always-relevant manual notes.
-    if [[ " $CFG_EMULATORS " == *" retroarch "* ]]; then
-        printf '  • RetroArch: install the cores listed in each system'\''s metadata via Online Updater > Core Downloader.\n'
+    # RetroArch cores: only nag about the manual step when auto-install is off.
+    if [[ " $CFG_EMULATORS " == *" retroarch "* ]] && ! cfg_is_yes "$CFG_INSTALL_CORES"; then
+        printf '  • RetroArch: install each system'\''s core via Online Updater > Core Downloader, or run scripts/install-cores.sh.\n'
     fi
 
     cat <<EOF

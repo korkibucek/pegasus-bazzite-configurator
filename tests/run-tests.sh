@@ -24,6 +24,8 @@ source "$LIB/config.sh"
 source "$LIB/backup.sh"
 # shellcheck source=scripts/lib/pegasus.sh
 source "$LIB/pegasus.sh"
+# shellcheck source=scripts/lib/cores.sh
+source "$LIB/cores.sh"
 
 PASS=0; FAIL=0
 check() { # check "desc" "expected" "actual"
@@ -215,6 +217,14 @@ check "ra_core_url snes9x" "https://buildbot.libretro.com/nightly/linux/x86_64/l
 check "ra_core_dir under HOME" "/home/tester/.var/app/org.libretro.RetroArch/config/retroarch/cores" "$(ra_core_dir)"
 check_contains "ra_core_url is https" "$(ra_core_url mgba)" "https://"
 check "ra_core_file path" "/home/tester/.var/app/org.libretro.RetroArch/config/retroarch/cores/snes9x_libretro.so" "$(ra_core_file snes9x)"
+# cores_collect: unique cores for the configured RetroArch systems (honours overrides)
+config_set_defaults; CFG_EMULATORS="retroarch"; CFG_SYSTEMS="snes n64 psx"; CFG_SYSTEM_EMULATORS="psx=retroarch:swanstation"
+cores_out="$(cores_collect | sort | tr '\n' ' ')"
+check "cores_collect maps systems->cores" "mupen64plus_next snes9x swanstation " "$cores_out"
+# install_cores config validation
+config_set_defaults; CFG_INSTALL_CORES=maybe
+config_validate >/dev/null 2>&1 && r=0 || r=1; check_rc "validate rejects bad install_cores" 1 "$r"
+config_set_defaults
 
 # --- expanded catalog (#25) -------------------------------------------------
 for e in flycast cemu xemu; do
