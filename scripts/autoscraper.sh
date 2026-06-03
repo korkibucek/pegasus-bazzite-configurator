@@ -39,7 +39,7 @@ fi
 
 DEFAULT_ROMS="/home/hugo/ROMs"
 
-read -p "Enter your ROMs path [Default: $DEFAULT_ROMS]: " ROM_DIR
+read -r -p "Enter your ROMs path [Default: $DEFAULT_ROMS]: " ROM_DIR
 ROM_DIR=${ROM_DIR:-$DEFAULT_ROMS}
 
 if [ ! -d "$ROM_DIR" ]; then
@@ -47,7 +47,7 @@ if [ ! -d "$ROM_DIR" ]; then
     exit 1
 fi
 
-read -p "Enter the system folder to scrape (e.g., snes), or type 'all' to scrape everything: " SYSTEM
+read -r -p "Enter the system folder to scrape (e.g., snes), or type 'all' to scrape everything: " SYSTEM
 
 if [ -z "$SYSTEM" ]; then
     echo "Error: System cannot be empty."
@@ -56,8 +56,8 @@ fi
 
 echo ""
 echo "ScreenScraper.fr often blocks anonymous scraping during peak hours."
-read -p "ScreenScraper Username (Leave blank to try anonymously): " SS_USER
-read -s -p "ScreenScraper Password (Leave blank if anonymous): " SS_PASS
+read -r -p "ScreenScraper Username (Leave blank to try anonymously): " SS_USER
+read -r -s -p "ScreenScraper Password (Leave blank if anonymous): " SS_PASS
 echo ""
 
 # Safely handle authentication arguments
