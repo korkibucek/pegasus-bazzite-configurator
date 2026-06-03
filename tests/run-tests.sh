@@ -217,9 +217,18 @@ check_contains "ra_core_url is https" "$(ra_core_url mgba)" "https://"
 check "ra_core_file path" "/home/tester/.var/app/org.libretro.RetroArch/config/retroarch/cores/snes9x_libretro.so" "$(ra_core_file snes9x)"
 
 # --- expanded catalog (#25) -------------------------------------------------
-for e in flycast cemu vita3k xemu; do
+for e in flycast cemu xemu; do
     emu_exists "$e" && r=0 || r=1; check_rc "emulator '$e' in catalog" 0 "$r"
 done
+# #50: Vita3K is not on Flathub — recognised (so existing configs validate) but
+# marked unavailable, omitted from EMU_ORDER, and skipped gracefully at install.
+emu_exists vita3k && r=0 || r=1; check_rc "vita3k still recognized (config compat)" 0 "$r"
+check_contains "vita3k marked unavailable" "${EMU_UNAVAILABLE[vita3k]:-}" "Flathub"
+case " ${EMU_ORDER[*]} " in *" vita3k "*) check "vita3k not in EMU_ORDER" "absent" "PRESENT";; *) check "vita3k not in EMU_ORDER" "absent" "absent";; esac
+DRY_RUN=1; declare -ga PBC_EMU_INSTALLED=() PBC_EMU_SKIPPED=() PBC_EMU_FAILED=() PBC_EMU_UNAVAILABLE=()
+emu_install vita3k >/dev/null 2>&1 && r=0 || r=1; check_rc "emu_install vita3k => success (graceful skip)" 0 "$r"
+check "vita3k recorded unavailable" "vita3k" "${PBC_EMU_UNAVAILABLE[*]}"
+DRY_RUN=0
 config_set_defaults; CFG_EMULATORS="retroarch"; CFG_SYSTEMS="auto"
 auto_ra="$(pegasus_resolve_systems | sort | tr '\n' ' ')"
 check_contains "saturn auto-included for retroarch" "$auto_ra" "saturn"

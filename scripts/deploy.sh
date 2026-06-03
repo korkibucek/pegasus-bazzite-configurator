@@ -249,6 +249,7 @@ ${C_BOLD}Pegasus${C_RESET}        : $pega
 ${C_BOLD}Emulators${C_RESET}      :
   installed now : ${PBC_EMU_INSTALLED[*]:-（none）}
   already present: ${PBC_EMU_SKIPPED[*]:-（none）}
+  unavailable    : ${PBC_EMU_UNAVAILABLE[*]:-（none）}
   failed         : ${PBC_EMU_FAILED[*]:-（none）}
 ${C_BOLD}Systems${C_RESET}        :
   written        : ${PBC_SYSTEMS_WRITTEN[*]:-（none）}
