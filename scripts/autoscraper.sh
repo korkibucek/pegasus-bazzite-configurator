@@ -39,6 +39,7 @@ ROMS_OVERRIDE=""
 SYSTEM_ARG=""
 SS_USER_ARG=""
 REBUILD=0
+GENERATE_ONLY=0
 usage() {
     cat <<EOF
 Usage: scripts/autoscraper.sh [OPTIONS]
@@ -52,6 +53,8 @@ OPTIONS:
       --system NAME   System folder to scrape (e.g. snes), or 'all'.
   -u, --user USER     ScreenScraper username (you'll be prompted for the password).
       --rebuild       Rebuild the Skyscraper container image even if it exists.
+  -G, --generate-only Skip the ScreenScraper gather pass; only (re)generate
+                      metadata.pegasus.txt + media from the existing cache.
       --dry-run       Print the podman build/run commands; change nothing.
   -y, --yes           Non-interactive: use defaults/flags, don't prompt.
   -v, --verbose       Verbose output.
@@ -68,6 +71,7 @@ while [[ $# -gt 0 ]]; do
         --system)    SYSTEM_ARG="${2:?--system requires a name}"; shift 2 ;;
         -u|--user)   SS_USER_ARG="${2:?--user requires a value}"; shift 2 ;;
         --rebuild)   REBUILD=1; shift ;;
+        -G|--generate-only) GENERATE_ONLY=1; shift ;;
         --dry-run)   DRY_RUN=1; shift ;;
         -y|--yes)    ASSUME_YES=1; shift ;;
         -v|--verbose) VERBOSE=1; shift ;;
@@ -119,21 +123,36 @@ DOCKERFILE
 }
 
 # scrape_system SYS ROM_DIR [AUTH_ARGS...] — the two-pass Skyscraper run.
+#
+# Two details that make the output usable by Pegasus (issue #60):
+#  * The ROM dir is bind-mounted at its REAL host path (not /roms), so the
+#    absolute file:/assets.* paths Skyscraper writes into metadata.pegasus.txt
+#    are valid on the host where Pegasus reads them.
+#  * `--flags unattend` makes Skyscraper overwrite the deploy-created
+#    metadata.pegasus.txt without an interactive prompt, while preserving its
+#    existing collection/shortname/launch/extensions header. Without it,
+#    Skyscraper asks "overwrite? (y/N)" and writes nothing on a non-"y" answer.
 scrape_system() {
     local sys="$1" rom_dir="$2"; shift 2
     log_step "Processing: $sys"
+    # Interactive TTY only when we actually have one (lets -y/headless runs work).
+    local tty=(); [[ -t 0 && -t 1 ]] && tty=(-it)
     # Pass 1: gather artwork + metadata from ScreenScraper into the cache.
-    run_cmd podman run --rm -it \
-        -v "$rom_dir:/roms:Z" \
-        -v "$CACHE_DIR:/root/.skyscraper:Z" \
-        "$IMAGE_NAME" \
-        -p "$sys" -s screenscraper -i "/roms/$sys" "$@"
+    if [[ "$GENERATE_ONLY" != 1 ]]; then
+        run_cmd podman run --rm "${tty[@]}" \
+            -v "$rom_dir:$rom_dir:Z" \
+            -v "$CACHE_DIR:/root/.skyscraper:Z" \
+            "$IMAGE_NAME" \
+            --flags unattend -p "$sys" -s screenscraper -i "$rom_dir/$sys" "$@"
+    else
+        log_info "$sys: --generate-only — skipping the ScreenScraper gather pass"
+    fi
     # Pass 2: generate metadata.pegasus.txt + media from the cache.
-    run_cmd podman run --rm -it \
-        -v "$rom_dir:/roms:Z" \
+    run_cmd podman run --rm "${tty[@]}" \
+        -v "$rom_dir:$rom_dir:Z" \
         -v "$CACHE_DIR:/root/.skyscraper:Z" \
         "$IMAGE_NAME" \
-        -p "$sys" -f pegasus -i "/roms/$sys" -g "/roms/$sys"
+        --flags unattend -p "$sys" -f pegasus -i "$rom_dir/$sys" -g "$rom_dir/$sys"
 }
 
 main() {
@@ -177,8 +196,9 @@ main() {
     fi
 
     # ScreenScraper credentials (optional; avoids anonymous rate limits).
+    # Not needed for --generate-only (no gather pass).
     local ss_user="$SS_USER_ARG" ss_pass="" auth=()
-    if [[ "$ASSUME_YES" != 1 && -z "$ss_user" ]]; then
+    if [[ "$GENERATE_ONLY" != 1 && "$ASSUME_YES" != 1 && -z "$ss_user" ]]; then
         log_info "ScreenScraper.fr throttles anonymous scraping; an account helps."
         ss_user="$(ask "ScreenScraper username (blank = anonymous)" "")"
     fi
