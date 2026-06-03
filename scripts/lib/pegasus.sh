@@ -54,7 +54,7 @@ pegasus_install() {
             else
                 ensure_flathub || { log_error "cannot install Pegasus without Flathub"; return 1; }
                 log_info "Installing Pegasus Frontend ($PEGASUS_FLATPAK_ID)"
-                if run_cmd flatpak install --user --noninteractive --assumeyes flathub "$PEGASUS_FLATPAK_ID"; then
+                if run_cmd_capture flatpak install --user --noninteractive --assumeyes flathub "$PEGASUS_FLATPAK_ID"; then
                     PBC_PEGASUS_IS_FLATPAK=1
                     PBC_PEGASUS_INSTALLED=1
                 else

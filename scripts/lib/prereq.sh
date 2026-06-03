@@ -68,6 +68,27 @@ check_disk_space() {
 
 # check_writable PATH — verifies we can create/write under PATH (or its nearest
 # existing parent). Fatal: we cannot deploy without it.
+# path_is_writable PATH -> 0 if PATH (or its nearest existing parent) is writable.
+# Pure (no logging/side effects) so interactive flows can probe before committing.
+path_is_writable() {
+    local probe="$1"
+    while [[ ! -e "$probe" && "$probe" != "/" ]]; do probe="$(dirname -- "$probe")"; done
+    [[ -w "$probe" ]]
+}
+
+# rom_root_suggestions -> writable ROM-root candidates, one per line: always
+# $HOME/ROMs, plus any existing writable mount under /run/media and /var/mnt
+# (common Bazzite locations for SD cards / external drives). No root required.
+rom_root_suggestions() {
+    {
+        printf '%s\n' "$HOME/ROMs"
+        local m
+        for m in /run/media/"$USER"/* /run/media/* /var/mnt/*; do
+            [[ -d "$m" && -w "$m" ]] && printf '%s/ROMs\n' "$m"
+        done
+    } 2>/dev/null | awk '!seen[$0]++'
+}
+
 check_writable() {
     local target="$1"
     local probe="$target"
@@ -75,7 +96,8 @@ check_writable() {
     if [[ -w "$probe" ]]; then
         log_ok "write access: OK ($probe)"
     else
-        _prereq_fail "write access: cannot write to $probe — choose a path under your home directory"
+        local sugg; sugg="$(rom_root_suggestions | paste -sd', ' -)"
+        _prereq_fail "write access: cannot write to $probe (this tool never uses root). Choose a writable ROM root, e.g.: ${sugg:-$HOME/ROMs}"
     fi
 }
 

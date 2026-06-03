@@ -166,10 +166,23 @@ ensure_flathub() {
         log_error "flatpak is required but not installed"
         return 1
     fi
-    if flatpak remotes --columns=name 2>/dev/null | grep -qiw flathub; then return 0; fi
-    log_info "Adding Flathub remote at --user scope"
-    run_cmd flatpak remote-add --user --if-not-exists flathub \
+    # We install at --user scope, so we need a flathub remote in the USER
+    # installation specifically. Bazzite ships flathub ONLY as a (filtered)
+    # SYSTEM remote, so checking all scopes here wrongly concludes "present" and
+    # then `flatpak install --user flathub <id>` fails with
+    # "Remote \"flathub\" not found in the user installation". Check the user
+    # scope explicitly and add it if missing (this also gives an unfiltered
+    # catalog, sidestepping the system blocklist). See issue #44.
+    if flatpak remotes --user --columns=name 2>/dev/null | grep -qiw flathub; then return 0; fi
+    log_info "Adding Flathub remote at --user scope (Bazzite ships only a filtered system remote)"
+    run_cmd_capture flatpak remote-add --user --if-not-exists flathub \
         https://dl.flathub.org/repo/flathub.flatpakrepo
+}
+
+# flathub_user_remote_present -> 0 if a flathub remote exists at --user scope.
+# Extracted for unit testing the scope-aware detection.
+flathub_user_remote_present() {
+    flatpak remotes --user --columns=name 2>/dev/null | grep -qiw flathub
 }
 
 # emu_install KEY — install one emulator Flatpak (idempotent).
@@ -182,7 +195,8 @@ emu_install() {
     fi
     log_info "Installing ${EMU_NAME[$k]} ($id)"
     [[ -n "${EMU_NOTE[$k]:-}" ]] && log_warn "${k}: ${EMU_NOTE[$k]}"
-    if run_cmd flatpak install --user --noninteractive --assumeyes flathub "$id"; then
+    # run_cmd_capture surfaces flatpak's real error on failure (issue #45).
+    if run_cmd_capture flatpak install --user --noninteractive --assumeyes flathub "$id"; then
         PBC_EMU_INSTALLED+=("$k")
     else
         log_error "Failed to install $id (continuing with remaining emulators)"
