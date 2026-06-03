@@ -201,6 +201,10 @@ build_launch_line() {
         local cp="$HOME/.var/app/${EMU_ID[retroarch]}/config/retroarch/cores/${core}_libretro.so"
         tmpl="${tmpl//\{CORE_PATH\}/$cp}"
     fi
+    # AppImage-backed emulators (e.g. Vita3K): resolve the installed AppImage path.
+    if [[ -n "${EMU_APPIMAGE[$emu]:-}" ]]; then
+        tmpl="${tmpl//\{APPIMAGE\}/$(emu_appimage_path "$emu")}"
+    fi
     printf '%s%s' "$LAUNCH_PREFIX" "$tmpl"
 }
 

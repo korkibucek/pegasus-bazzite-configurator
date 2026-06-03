@@ -21,18 +21,26 @@ filesystem access to your ROM root. Catalog lives in
 | `flycast` | Flycast | `org.flycast.Flycast` | Dreamcast / NAOMI (standalone) | `"{file.path}"` |
 | `cemu` | Cemu | `info.cemu.Cemu` | Wii U *(desktop-recommended)* | `-f -g "{file.path}"` |
 | `xemu` | xemu | `app.xemu.xemu` | Original Xbox *(desktop-recommended)* | `-full-screen -dvd_path "{file.path}"` |
+| `vita3k` | Vita3K | *AppImage* (GitHub) | PS Vita *(experimental)* | `"<AppImage>" "{file.path}"` |
 
 Additional systems shipped in `config/systems/`: **saturn** (RetroArch
 `mednafen_saturn`), **neogeo** (`fbneo`), **lynx** (`handy`), **wonderswan**
 (`mednafen_wswan`), **c64** (`vice_x64sc`), **amiga** (`puae`), plus **wiiu**
-(Cemu) and **xbox** (xemu). The RetroArch ones auto-include when RetroArch is
-selected; the standalone ones only when their emulator is selected. Saturn/Neo
-Geo/Amiga and the standalone systems need their own BIOS/firmware/keys (none are
-provided).
+(Cemu), **xbox** (xemu) and **vita** (Vita3K). The RetroArch ones auto-include
+when RetroArch is selected; the standalone ones only when their emulator is
+selected. Saturn/Neo Geo/Amiga and the standalone systems need their own
+BIOS/firmware/keys (none are provided).
 
-> **PS Vita is not supported by this tool.** Vita3K is not published on Flathub
-> (only via its own GitHub/AppImage builds), so it cannot be installed through
-> the Flatpak flow. If you want it, install the Vita3K AppImage yourself.
+### Vita3K — installed via AppImage (not Flathub)
+
+Vita3K is **not on Flathub**, so this tool installs its **official AppImage**
+(`Vita3K-x86_64.AppImage` / `Vita3K-aarch64.AppImage`, from the Vita3K GitHub
+releases) into `~/Applications/Vita3K.AppImage` (downloaded over HTTPS, verified
+as an ELF, `chmod +x`). AppImages run on the host with no sandbox, so Vita3K
+reads ROMs directly — no `flatpak override` needed. Needs **FUSE** (present on
+Bazzite); if FUSE is unavailable, run with `APPIMAGE_EXTRACT_AND_RUN=1`. Vita3K
+is experimental and manages installed titles — pass a `.vpk` to install a game,
+or launch it to use its UI; it also needs PS Vita firmware you provide.
 
 When Pegasus is a Flatpak, every launch line is additionally prefixed with
 `flatpak-spawn --host ` so the sandboxed Pegasus can start the host Flatpak.

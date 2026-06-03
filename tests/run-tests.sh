@@ -230,14 +230,20 @@ config_set_defaults
 for e in flycast cemu xemu; do
     emu_exists "$e" && r=0 || r=1; check_rc "emulator '$e' in catalog" 0 "$r"
 done
-# #50: Vita3K is not on Flathub — recognised (so existing configs validate) but
-# marked unavailable, omitted from EMU_ORDER, and skipped gracefully at install.
-emu_exists vita3k && r=0 || r=1; check_rc "vita3k still recognized (config compat)" 0 "$r"
-check_contains "vita3k marked unavailable" "${EMU_UNAVAILABLE[vita3k]:-}" "Flathub"
-case " ${EMU_ORDER[*]} " in *" vita3k "*) check "vita3k not in EMU_ORDER" "absent" "PRESENT";; *) check "vita3k not in EMU_ORDER" "absent" "absent";; esac
+# #54: Vita3K is not on Flathub — supported via its official AppImage.
+emu_exists vita3k && r=0 || r=1; check_rc "vita3k in catalog" 0 "$r"
+emu_is_appimage vita3k && r=0 || r=1; check_rc "vita3k is an AppImage emulator" 0 "$r"
+case " ${EMU_ORDER[*]} " in *" vita3k "*) check "vita3k offered in EMU_ORDER" "present" "present";; *) check "vita3k offered in EMU_ORDER" "present" "ABSENT";; esac
+HOME="/home/tester"
+check "vita3k appimage path" "/home/tester/Applications/Vita3K.AppImage" "$(emu_appimage_path vita3k)"
+check_contains "vita3k appimage url is official github https" "$(emu_appimage_url vita3k)" "https://github.com/Vita3K/Vita3K/releases"
+# launch line resolves to the AppImage path (no flatpak)
+LAUNCH_PREFIX=""; ll_vita="$(build_launch_line vita3k '')"
+check "vita3k launch uses AppImage path" '"/home/tester/Applications/Vita3K.AppImage" "{file.path}"' "$ll_vita"
+# emu_install dry-run reports it as installed (download previewed), not unavailable
 DRY_RUN=1; declare -ga PBC_EMU_INSTALLED=() PBC_EMU_SKIPPED=() PBC_EMU_FAILED=() PBC_EMU_UNAVAILABLE=()
-emu_install vita3k >/dev/null 2>&1 && r=0 || r=1; check_rc "emu_install vita3k => success (graceful skip)" 0 "$r"
-check "vita3k recorded unavailable" "vita3k" "${PBC_EMU_UNAVAILABLE[*]}"
+emu_install vita3k >/dev/null 2>&1 && r=0 || r=1; check_rc "emu_install vita3k (dry-run) success" 0 "$r"
+check "vita3k recorded installed (dry-run)" "vita3k" "${PBC_EMU_INSTALLED[*]}"
 DRY_RUN=0
 config_set_defaults; CFG_EMULATORS="retroarch"; CFG_SYSTEMS="auto"
 auto_ra="$(pegasus_resolve_systems | sort | tr '\n' ' ')"

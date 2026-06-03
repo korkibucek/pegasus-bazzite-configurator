@@ -24,7 +24,7 @@
 #                 controller_friendly=no. If absent, EMU_LAUNCH is used.
 #                 EMU_LAUNCH itself IS the controller-friendly form (fullscreen /
 #                 batch / no-GUI where applicable).
-declare -gA EMU_NAME EMU_ID EMU_LAUNCH EMU_NOTE EMU_LAUNCH_WINDOWED EMU_UNAVAILABLE
+declare -gA EMU_NAME EMU_ID EMU_LAUNCH EMU_NOTE EMU_LAUNCH_WINDOWED EMU_UNAVAILABLE EMU_APPIMAGE
 
 EMU_NAME[retroarch]="RetroArch (multi-system)"
 EMU_ID[retroarch]="org.libretro.RetroArch"
@@ -83,14 +83,14 @@ EMU_LAUNCH[cemu]='flatpak run info.cemu.Cemu -f -g "{file.path}"'
 EMU_LAUNCH_WINDOWED[cemu]='flatpak run info.cemu.Cemu -g "{file.path}"'
 EMU_NOTE[cemu]="Wii U. Demanding (desktop recommended). Needs your own game files/keys; folder-based titles may need adjustment."
 
-# PS Vita (Vita3K) is NOT published on Flathub (only its own GitHub/AppImage
-# builds), so it cannot be installed by this Flatpak flow (issue #50). It is kept
-# recognised (so existing configs that list `vita3k` still validate) but marked
-# UNAVAILABLE: the installer skips it with a warning instead of failing, and it
-# is omitted from EMU_ORDER so it is never offered to new users.
-EMU_NAME[vita3k]="Vita3K (PS Vita)"
+# Vita3K (PS Vita) is NOT on Flathub — it ships an official AppImage on GitHub.
+# It is therefore an AppImage-backed emulator (see EMU_APPIMAGE below): installed
+# by downloading the official AppImage to ~/Applications, no Flatpak/sandbox.
+EMU_NAME[vita3k]="Vita3K (PS Vita, experimental)"
 EMU_ID[vita3k]="net.vita3k.Vita3K"
-EMU_UNAVAILABLE[vita3k]="not published on Flathub — install the Vita3K AppImage manually if you want it"
+EMU_APPIMAGE[vita3k]="Vita3K"   # base filename -> ~/Applications/Vita3K.AppImage
+EMU_LAUNCH[vita3k]='"{APPIMAGE}" "{file.path}"'
+EMU_NOTE[vita3k]="Installed from the official Vita3K AppImage (GitHub releases), not Flathub. Experimental: Vita3K manages installed titles — pass a .vpk to install, or launch it to use its UI. Requires PS Vita firmware. Needs FUSE (present on Bazzite)."
 
 EMU_NAME[xemu]="xemu (Original Xbox)"
 EMU_ID[xemu]="app.xemu.xemu"
@@ -99,7 +99,29 @@ EMU_LAUNCH_WINDOWED[xemu]='flatpak run app.xemu.xemu -dvd_path "{file.path}"'
 EMU_NOTE[xemu]="Original Xbox. Requires your own MCPX/BIOS and a formatted HDD image, configured once in xemu. Desktop recommended."
 
 # Stable display order for menus/summaries.
-EMU_ORDER=(retroarch dolphin pcsx2 ppsspp duckstation rpcs3 mame melonds scummvm flycast cemu xemu)
+EMU_ORDER=(retroarch dolphin pcsx2 ppsspp duckstation rpcs3 mame melonds scummvm flycast cemu vita3k xemu)
+
+# --- AppImage-backed emulators (not on Flathub) -----------------------------
+# emu_is_appimage KEY -> 0 if KEY installs from an AppImage rather than Flatpak.
+emu_is_appimage() { [[ -n "${EMU_APPIMAGE[$1]:-}" ]]; }
+# Where downloaded AppImages live.
+emu_appimage_dir() { printf '%s/Applications' "$HOME"; }
+# emu_appimage_path KEY -> absolute path of the installed AppImage.
+emu_appimage_path() { printf '%s/%s.AppImage' "$(emu_appimage_dir)" "${EMU_APPIMAGE[$1]}"; }
+# emu_appimage_url KEY -> official download URL for the current CPU arch, or
+# non-zero if no build exists for this arch.
+emu_appimage_url() {
+    local k="$1" arch; arch="$(uname -m 2>/dev/null)"
+    case "$k" in
+        vita3k)
+            case "$arch" in
+                x86_64)  printf 'https://github.com/Vita3K/Vita3K/releases/download/continuous/Vita3K-x86_64.AppImage' ;;
+                aarch64) printf 'https://github.com/Vita3K/Vita3K/releases/download/continuous/Vita3K-aarch64.AppImage' ;;
+                *) return 1 ;;
+            esac ;;
+        *) return 1 ;;
+    esac
+}
 
 # --- BIOS / firmware expectations -------------------------------------------
 # Emulators that need user-supplied BIOS/firmware (which this tool NEVER
@@ -137,6 +159,7 @@ emu_catalog_list() {
 
 # emu_installed KEY -> 0 if the Flatpak is installed.
 emu_installed() {
+    if emu_is_appimage "$1"; then [[ -f "$(emu_appimage_path "$1")" ]]; return; fi
     have flatpak || return 1
     flatpak info "${EMU_ID[$1]}" >/dev/null 2>&1
 }
@@ -203,6 +226,8 @@ emu_install() {
         PBC_EMU_SKIPPED+=("$k")
         return 0
     fi
+    # AppImage-backed emulators (e.g. Vita3K) install from their official AppImage.
+    if emu_is_appimage "$k"; then emu_install_appimage "$k"; return; fi
     log_info "Installing ${EMU_NAME[$k]} ($id)"
     [[ -n "${EMU_NOTE[$k]:-}" ]] && log_warn "${k}: ${EMU_NOTE[$k]}"
     # run_cmd_capture surfaces flatpak's real error on failure (issue #45).
@@ -213,6 +238,38 @@ emu_install() {
         PBC_EMU_FAILED+=("$k")
         return 1
     fi
+}
+
+# emu_install_appimage KEY — download + verify + install an emulator's official
+# AppImage to ~/Applications. Verified as an ELF before chmod +x; never executed
+# during install. Non-fatal on failure.
+emu_install_appimage() {
+    local k="$1" dest url tmp
+    dest="$(emu_appimage_path "$k")"
+    if ! url="$(emu_appimage_url "$k")"; then
+        log_warn "${EMU_NAME[$k]}: no AppImage build for $(uname -m) — skipping"
+        PBC_EMU_UNAVAILABLE+=("$k"); return 0
+    fi
+    log_info "Installing ${EMU_NAME[$k]} (AppImage)"
+    [[ -n "${EMU_NOTE[$k]:-}" ]] && log_warn "${k}: ${EMU_NOTE[$k]}"
+    if is_dry_run; then
+        printf '%s[dry-run]%s download %s -> %s (chmod +x)\n' "$C_DIM" "$C_RESET" "$url" "$dest"
+        PBC_EMU_INSTALLED+=("$k"); return 0
+    fi
+    if ! have curl; then log_error "${k}: curl required to download the AppImage"; PBC_EMU_FAILED+=("$k"); return 1; fi
+    run_cmd mkdir -p -- "$(emu_appimage_dir)"
+    tmp="$(mktemp -d)"
+    if ! curl -fL --proto '=https' --tlsv1.2 --max-time 300 -o "$tmp/app.AppImage" "$url"; then
+        log_error "${k}: AppImage download failed ($url)"; PBC_EMU_FAILED+=("$k"); rm -rf "$tmp"; return 1
+    fi
+    # Verify ELF magic (7f 45 4c 46) before trusting/executing it.
+    if [[ "$(od -An -tx1 -N4 "$tmp/app.AppImage" 2>/dev/null | tr -d ' \n')" != "7f454c46" ]]; then
+        log_error "${k}: downloaded file is not an ELF/AppImage — refusing"; PBC_EMU_FAILED+=("$k"); rm -rf "$tmp"; return 1
+    fi
+    mv -f "$tmp/app.AppImage" "$dest" && chmod +x "$dest"
+    rm -rf "$tmp"
+    log_ok "${k}: installed AppImage -> $dest"
+    PBC_EMU_INSTALLED+=("$k")
 }
 
 # emu_grant_rom_access KEY PATH... — grant the emulator filesystem access to
@@ -240,8 +297,9 @@ emu_install_selected() {
     for k in $list; do
         emu_exists "$k" || { log_warn "unknown emulator '$k' — skipping"; continue; }
         emu_install "$k" || continue
-        # Nothing to grant for emulators we didn't install (unavailable on Flathub).
-        [[ -n "${EMU_UNAVAILABLE[$k]:-}" ]] && continue
+        # No flatpak override for unavailable emulators or AppImages (AppImages
+        # run on the host and read ROMs directly — no sandbox).
+        { [[ -n "${EMU_UNAVAILABLE[$k]:-}" ]] || emu_is_appimage "$k"; } && continue
         emu_grant_rom_access "$k" "$rom_root" "${extra[@]}"
     done
 }

@@ -23,6 +23,12 @@ pre-1.0 development entries until the first tagged release.
   on how to add Pegasus to Steam for Game Mode (#16).
 
 ### Added
+- Vita3K (PS Vita) support via its **official AppImage** (#54): Vita3K isn't on
+  Flathub, so it's now installed by downloading `Vita3K-<arch>.AppImage` (HTTPS,
+  ELF-verified, `chmod +x`) to `~/Applications/`. Adds a general AppImage-backed
+  emulator path (`EMU_APPIMAGE`); AppImages run on the host (no sandbox, direct
+  ROM access). Restores the `vita` system. Supersedes the #50 stop-gap that
+  marked Vita3K unavailable.
 - `LICENSE` (Apache-2.0) + `NOTICE`; README license section updated (#39).
 - `CONTRIBUTING.md` — developer guide: repo layout, local dev gate, how to add a
   system/emulator, branch/PR conventions, and the hardware-validation boundary;
