@@ -100,11 +100,15 @@ main() {
         emu_exists "$k" || { warn "unknown emulator key '$k' in config"; continue; }
         if emu_installed "$k"; then
             ok "${EMU_NAME[$k]} installed"
-            if flatpak_can_access "${EMU_ID[$k]}" "$CFG_ROM_ROOT"; then
+            if emu_is_appimage "$k"; then
+                ok "  ${k}: AppImage (runs on host, no sandbox — reads ROMs directly)"
+            elif flatpak_can_access "${EMU_ID[$k]}" "$CFG_ROM_ROOT"; then
                 ok "  ${k}: sandbox can access ROM root"
             else
                 bad "  ${k}: NO sandbox access to $CFG_ROM_ROOT — run: flatpak override --user ${EMU_ID[$k]} --filesystem=\"$CFG_ROM_ROOT\""
             fi
+        elif emu_is_appimage "$k"; then
+            bad "${EMU_NAME[$k]} not installed (AppImage missing at $(emu_appimage_path "$k"))"
         else
             bad "${EMU_NAME[$k]} not installed (${EMU_ID[$k]})"
         fi
