@@ -63,6 +63,14 @@ pre-1.0 development entries until the first tagged release.
   emulators (#17).
 
 ### Fixed
+- **Blocker on real Bazzite (#44):** all `--user` Flatpak installs failed because
+  Bazzite ships flathub only as a filtered *system* remote and `ensure_flathub`
+  was scope-blind. It now checks the *user* scope and adds a `--user` flathub
+  remote when missing, so emulator/Pegasus installs work out of the box.
+- Flatpak install failures now surface the real flatpak error via
+  `run_cmd_capture` instead of an opaque "Failed to install X" (#45).
+- Non-writable `rom_root` (e.g. `/var/ROMS`) now produces actionable suggestions
+  and an interactive re-prompt instead of a dead-end abort (#46).
 - `write_file` lost the trailing newline (content came through `$(cat)`), so
   generated files had no final newline and appends to `game_dirs.txt` glued onto
   the last line. Now writes exactly one trailing newline (found via #17).

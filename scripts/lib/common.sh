@@ -114,6 +114,34 @@ run_cmd() {
     "$@"
 }
 
+# run_cmd_capture cmd args... — like run_cmd, but captures the command's combined
+# stdout+stderr. On failure it surfaces the actual error (the last few lines) at
+# ERROR level and writes the full output to the log, so failures are diagnosable
+# instead of an opaque "it failed". Returns the command's exit status.
+run_cmd_capture() {
+    if is_dry_run; then
+        printf '%s[dry-run]%s %s\n' "$C_DIM" "$C_RESET" "$(_quote_args "$@")"
+        if [[ -n "$LOG_FILE" ]]; then printf '[%s] [DRYRUN] %s\n' "$(_iso_now)" "$(_quote_args "$@")" >>"$LOG_FILE" 2>/dev/null || true; fi
+        return 0
+    fi
+    log_debug "exec: $(_quote_args "$@")"
+    local out rc
+    out="$("$@" 2>&1)"; rc=$?
+    if [[ -n "$out" && -n "$LOG_FILE" ]]; then
+        printf '[%s] [OUTPUT] %s\n' "$(_iso_now)" "$(_quote_args "$@")" >>"$LOG_FILE" 2>/dev/null || true
+        printf '%s\n' "$out" >>"$LOG_FILE" 2>/dev/null || true
+    fi
+    if (( rc != 0 )); then
+        log_error "command failed (exit $rc): $(_quote_args "$@")"
+        # Echo the last few non-empty output lines — the real reason.
+        local line
+        while IFS= read -r line; do
+            [[ -n "$line" ]] && log_error "  ↳ $line"
+        done < <(printf '%s\n' "$out" | grep -v '^[[:space:]]*$' | tail -n 4)
+    fi
+    return $rc
+}
+
 # _quote_args — render an argv as a copy-pasteable, shell-safe string for logs.
 _quote_args() {
     local out='' a

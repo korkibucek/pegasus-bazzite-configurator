@@ -135,6 +135,16 @@ config_interactive() {
     fi
 
     CFG_ROM_ROOT="$(ask "ROM root directory" "$CFG_ROM_ROOT")"
+    # Guide the user away from non-writable roots (e.g. /var/ROMS) before we get
+    # to the fatal prerequisite check — offer concrete writable options (#46).
+    local _wtries=0
+    while ! path_is_writable "$CFG_ROM_ROOT"; do
+        log_warn "Not writable: $CFG_ROM_ROOT — this tool never uses root."
+        echo "Writable options on this system:"; rom_root_suggestions | sed 's/^/  - /'
+        _wtries=$((_wtries + 1))
+        [[ "$_wtries" -ge 3 ]] && { log_warn "continuing with '$CFG_ROM_ROOT'; the prerequisite check will re-flag it"; break; }
+        CFG_ROM_ROOT="$(ask "ROM root directory (writable)" "$HOME/ROMs")"
+    done
     if [[ ! -d "$CFG_ROM_ROOT" ]]; then
         ask_yes_no "ROM root '$CFG_ROM_ROOT' does not exist. Create it?" Y \
             && CFG_CREATE_ROM_DIR=yes || CFG_CREATE_ROM_DIR=no

@@ -16,6 +16,8 @@ source "$LIB/common.sh"
 source "$LIB/detect.sh"
 # shellcheck source=scripts/lib/emulators.sh
 source "$LIB/emulators.sh"
+# shellcheck source=scripts/lib/prereq.sh
+source "$LIB/prereq.sh"
 # shellcheck source=scripts/lib/config.sh
 source "$LIB/config.sh"
 # shellcheck source=scripts/lib/backup.sh
@@ -169,6 +171,35 @@ config_set_defaults
 config_set_defaults; CFG_EMULATORS="dolphin"; CFG_SYSTEMS="auto"
 dolphin_systems="$(pegasus_resolve_systems | sort | tr '\n' ' ')"
 check "auto systems for dolphin" "gamecube wii " "$dolphin_systems"
+
+# --- #44: scope-aware flathub detection (user scope) ------------------------
+# Stub `flatpak` to simulate user-scope remotes.
+flatpak() { case "$*" in "remotes --user --columns=name") printf '%s\n' "${FAKE_USER_REMOTES:-}";; *) return 0;; esac; }
+FAKE_USER_REMOTES="flathub"
+flathub_user_remote_present && r=0 || r=1; check_rc "flathub user remote detected when present" 0 "$r"
+FAKE_USER_REMOTES=""    # e.g. Bazzite: only a SYSTEM flathub, none at user scope
+flathub_user_remote_present && r=0 || r=1; check_rc "flathub user remote absent (Bazzite case)" 1 "$r"
+unset -f flatpak; unset FAKE_USER_REMOTES
+
+# --- #45: run_cmd_capture surfaces the real error + returns the exit code ----
+LOG_FILE="$TMP/rcc.log"; : >"$LOG_FILE"
+run_cmd_capture bash -c 'echo boom-the-real-error >&2; exit 7' && rc=0 || rc=$?
+check_rc "run_cmd_capture propagates exit code" 7 "$rc"
+grep -q "boom-the-real-error" "$LOG_FILE" && r=0 || r=1
+check_rc "run_cmd_capture logs the real error" 0 "$r"
+LOG_FILE=""
+
+# --- #46: ROM-root writability helpers --------------------------------------
+HOME="$TMP/home46"; mkdir -p "$HOME"
+check_contains "rom_root_suggestions includes \$HOME/ROMs" "$(rom_root_suggestions)" "$TMP/home46/ROMs"
+mkdir -p "$TMP/writable"
+path_is_writable "$TMP/writable/new/sub" && r=0 || r=1   # nearest existing parent is writable
+check_rc "path_is_writable true for writable tree" 0 "$r"
+if [[ "$(id -u)" -ne 0 ]]; then
+    ro="$TMP/ro"; mkdir -p "$ro"; chmod 555 "$ro"
+    path_is_writable "$ro/x" && r=0 || r=1; check_rc "path_is_writable false for read-only dir" 1 "$r"
+    chmod 755 "$ro"
+fi
 
 # --- steam_shortcuts.py binary VDF round-trip (#22) -------------------------
 if have python3; then
