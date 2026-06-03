@@ -39,6 +39,12 @@ pegasus_install() {
     case "$CFG_PEGASUS_INSTALL" in
         skip)
             log_info "pegasus_install=skip — not installing Pegasus"
+            # Still configure an already-installed Pegasus flatpak so launch
+            # commands + ROM access are correct (issue #48). No install happens.
+            if flatpak info "$PEGASUS_FLATPAK_ID" >/dev/null 2>&1; then
+                log_info "detected existing Pegasus flatpak — configuring launch + ROM access (no install)"
+                PBC_PEGASUS_IS_FLATPAK=1
+            fi
             ;;
         appimage)
             # We never auto-download an unverified binary. Provide clear,

@@ -279,6 +279,20 @@ check_contains "backup dir under state" "$PBC_BACKUP_DIR" "$TMP/state/backups/"
 first_dir="$PBC_BACKUP_DIR"; backup_begin
 check "backup_begin idempotent" "$first_dir" "$PBC_BACKUP_DIR"
 
+# --- #48: pegasus_install=skip still configures an existing flatpak Pegasus --
+DRY_RUN=1
+flatpak() { return 0; }   # stub: pretend Pegasus flatpak is installed
+config_set_defaults; CFG_PEGASUS_INSTALL=skip; CFG_ROM_ROOT="$TMP/roms48"; CFG_EXTRA_ROM_PATHS=""
+LAUNCH_PREFIX=""; PBC_PEGASUS_IS_FLATPAK=0
+pegasus_install >/dev/null 2>&1
+check "skip+existing-flatpak sets IS_FLATPAK" "1" "$PBC_PEGASUS_IS_FLATPAK"
+check_contains "skip+existing-flatpak sets spawn prefix" "$LAUNCH_PREFIX" "flatpak-spawn --host"
+flatpak() { return 1; }    # stub: no Pegasus flatpak (native/none)
+config_set_defaults; CFG_PEGASUS_INSTALL=skip; LAUNCH_PREFIX=""; PBC_PEGASUS_IS_FLATPAK=0
+pegasus_install >/dev/null 2>&1
+check "skip+no-flatpak leaves prefix empty" "" "$LAUNCH_PREFIX"
+unset -f flatpak; DRY_RUN=0; config_set_defaults
+
 # --- summary ----------------------------------------------------------------
 printf '\n%d passed, %d failed\n' "$PASS" "$FAIL"
 [[ "$FAIL" -eq 0 ]]

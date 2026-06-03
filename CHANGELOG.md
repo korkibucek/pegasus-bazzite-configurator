@@ -63,6 +63,10 @@ pre-1.0 development entries until the first tagged release.
   emulators (#17).
 
 ### Fixed
+- `pegasus_install: skip` now still configures an already-installed Pegasus
+  flatpak — sets the `flatpak-spawn --host` launch prefix and grants ROM
+  `--filesystem` access (without installing) so the generated config works for
+  users who manage Pegasus themselves (#48).
 - **Blocker on real Bazzite (#44):** all `--user` Flatpak installs failed because
   Bazzite ships flathub only as a filtered *system* remote and `ensure_flathub`
   was scope-blind. It now checks the *user* scope and adds a `--user` flathub
