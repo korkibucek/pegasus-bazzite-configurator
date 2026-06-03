@@ -85,6 +85,7 @@ Update / undo / uninstall:
 ./scripts/deploy.sh --list-emulators # show the supported emulator catalog
 ./scripts/deploy.sh --list-systems   # show the supported system catalog
 ./scripts/deploy.sh --repair --config <cfg>   # re-apply ROM sandbox permissions only
+./scripts/autoscraper.sh             # scrape box art + metadata (Skyscraper via Podman)
 ./scripts/add-to-steam.sh            # opt-in: add Pegasus to Steam for Game Mode
 ./scripts/install-cores.sh --config <cfg> --force   # (re)install RetroArch cores manually
 ./scripts/update.sh                  # flatpak update Pegasus + your emulators
@@ -150,6 +151,7 @@ behaviour — those need a real Bazzite machine. See
 - [docs/PEGASUS_CONFIG.md](docs/PEGASUS_CONFIG.md) — config/metadata structure, adding a system
 - [docs/EMULATOR_SUPPORT.md](docs/EMULATOR_SUPPORT.md) — emulators, launch commands, adding one
 - [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) — common Bazzite/Pegasus/Flatpak problems
+- [docs/SCRAPING.md](docs/SCRAPING.md) — scrape artwork/metadata with Skyscraper (Podman)
 - [docs/TESTING.md](docs/TESTING.md) — what the container test proves and what it doesn't
 
 Contributing? See [CONTRIBUTING.md](CONTRIBUTING.md) for the dev gate (`make
