@@ -64,14 +64,16 @@ Cores install to
 `~/.var/app/org.libretro.RetroArch/config/retroarch/cores/<core>_libretro.so`,
 which is exactly the path the generated `launch:` line references.
 
-### Auto-downloading cores (opt-in)
+### Auto-downloading cores (built into deploy)
 
-To skip the manual step, run the opt-in helper, which fetches exactly the cores
-your selected RetroArch systems need:
+`deploy.sh` installs the cores your selected RetroArch systems need **by default**
+(`install_cores: yes`) once RetroArch is installed. Set `install_cores: no` to
+skip it (then use RetroArch's Online Updater, or the standalone helper):
 
 ```bash
 ./scripts/install-cores.sh --config <your-config> --dry-run   # list cores + URLs
 ./scripts/install-cores.sh --config <your-config>             # download them
+./scripts/install-cores.sh --config <your-config> --force     # re-download/replace
 ```
 
 Cores come from the **official libretro buildbot** over HTTPS (host pinned in

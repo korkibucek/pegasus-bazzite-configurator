@@ -30,6 +30,7 @@ scripts/
     config.sh      Defaults, YAML-subset parser, prompts, validation
     emulators.sh   Emulator catalog + Flatpak install + ROM-path overrides
     pegasus.sh     Pegasus install + config/metadata generation
+    cores.sh       libretro core download (shared by deploy + install-cores.sh)
     backup.sh      Timestamped backup + restore
 config/
   example-config.yaml   Documented non-interactive config

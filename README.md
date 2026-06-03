@@ -86,7 +86,7 @@ Update / undo / uninstall:
 ./scripts/deploy.sh --list-systems   # show the supported system catalog
 ./scripts/deploy.sh --repair --config <cfg>   # re-apply ROM sandbox permissions only
 ./scripts/add-to-steam.sh            # opt-in: add Pegasus to Steam for Game Mode
-./scripts/install-cores.sh --config <cfg>     # opt-in: download needed RetroArch cores
+./scripts/install-cores.sh --config <cfg> --force   # (re)install RetroArch cores manually
 ./scripts/update.sh                  # flatpak update Pegasus + your emulators
 ./scripts/restore.sh --list          # show backups
 ./scripts/restore.sh                 # restore the most recent backup
@@ -112,6 +112,7 @@ Highlights:
 | `extra_rom_paths` | (none) | Extra mounts/SD cards to grant emulators |
 | `reuse_existing_library` | `auto` | Adopt a detected EmuDeck/ES-DE library as `rom_root` |
 | `system_emulators` | (none) | Override a system's emulator, e.g. `psx=retroarch:swanstation` |
+| `install_cores` | `yes` | Download the libretro cores your RetroArch systems need during deploy |
 
 CLI flags override the config file (`--force`, `--dry-run`, `--non-interactive`,
 `--allow-non-bazzite`, `--quiet`, `--verbose`). Run `./scripts/deploy.sh --help`.
