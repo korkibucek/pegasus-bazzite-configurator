@@ -33,8 +33,27 @@ ROMs and cache.
 ```
 
 Key flags: `--config FILE`, `--roms DIR`, `--system NAME|all`, `--user NAME`,
-`--rebuild` (rebuild the container image), `--dry-run`, `-y/--yes`, `-h/--help`.
-Run `./scripts/autoscraper.sh --help` for all of them.
+`--rebuild` (rebuild the container image), `-G/--generate-only` (re-emit
+metadata from the existing cache without re-scraping), `--dry-run`, `-y/--yes`,
+`-h/--help`. Run `./scripts/autoscraper.sh --help` for all of them.
+
+### Paths & the overwrite prompt (important)
+
+The ROM directory is bind-mounted into the container **at its real host path**,
+so the `file:` and `assets.*` paths Skyscraper writes into `metadata.pegasus.txt`
+are valid for Pegasus on the host (not container-only `/roms/...` paths). The
+scraper also passes Skyscraper `--flags unattend` so it **overwrites the
+`metadata.pegasus.txt` that `deploy.sh` created** without an interactive prompt —
+otherwise Skyscraper asks "overwrite? (y/N)" and, on anything but `y`, writes
+nothing (so scraping appears to do nothing). Your `collection`/`launch`/
+`extensions` header is preserved across the overwrite.
+
+If you scraped before this behaviour and Pegasus shows no art, just re-run with
+`--generate-only` (no re-download needed) to rebuild the metadata from cache:
+
+```bash
+./scripts/autoscraper.sh --roms ~/ROMs --system all --generate-only -y
+```
 
 ## How it works
 

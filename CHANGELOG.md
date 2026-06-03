@@ -83,6 +83,14 @@ pre-1.0 development entries until the first tagged release.
   emulators (#17).
 
 ### Fixed
+- autoscraper: scraped art/metadata now actually appears in Pegasus (#60). Two
+  fixes: pass Skyscraper `--flags unattend` so it overwrites the deploy-created
+  `metadata.pegasus.txt` instead of stopping at an interactive "overwrite? (y/N)"
+  prompt; and bind-mount the ROM dir at its **real host path** so the `file:`/
+  `assets.*` paths written into the metadata are valid on the host (not
+  container-only `/roms/...`). Added `-G/--generate-only` to rebuild metadata
+  from the existing cache (re-fix already-scraped systems without re-downloading)
+  and made the podman `-it` flags TTY-aware.
 - Removed Vita3K/`vita` from the catalog — it is **not on Flathub** (only its own
   GitHub/AppImage builds), so its install always failed and left the run in an
   error state. PS Vita is now documented as unsupported by the Flatpak flow (#50).
