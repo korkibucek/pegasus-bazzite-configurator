@@ -59,10 +59,11 @@ encodes those details.
 
 ## Supported emulators
 
-RetroArch, Dolphin, PCSX2, PPSSPP, DuckStation, RPCS3, MAME, melonDS, ScummVM —
-all via Flathub. See [docs/EMULATOR_SUPPORT.md](docs/EMULATOR_SUPPORT.md) for the
-launch templates, the DuckStation licensing caveat, and why Switch emulators are
-**not** included by default.
+RetroArch, Dolphin, PCSX2, PPSSPP, DuckStation, RPCS3, MAME, melonDS, ScummVM,
+Flycast, Cemu (Wii U) and xemu (Xbox) via Flathub, plus Vita3K (PS Vita) via its
+official AppImage. See [docs/EMULATOR_SUPPORT.md](docs/EMULATOR_SUPPORT.md) for
+the launch templates, the DuckStation licensing caveat, and why Switch emulators
+are **not** included by default.
 
 ## Quick start
 
@@ -79,23 +80,21 @@ cp config/example-config.yaml config/local-mydeck.yaml   # edit to taste
 ./scripts/deploy.sh --config config/local-mydeck.yaml --non-interactive
 ```
 
-Update / undo / uninstall:
+## Tools
 
-```bash
-./scripts/deploy.sh --list-emulators # show the supported emulator catalog
-./scripts/deploy.sh --list-systems   # show the supported system catalog
-./scripts/deploy.sh --repair --config <cfg>   # re-apply ROM sandbox permissions only
-./scripts/autoscraper.sh             # scrape box art + metadata (Skyscraper via Podman)
-./scripts/cleanup.sh                 # hide disc-track/dupe files from Pegasus (keeps ROMs)
-./scripts/add-to-steam.sh            # opt-in: add Pegasus to Steam for Game Mode
-./scripts/install-cores.sh --config <cfg> --force   # (re)install RetroArch cores manually
-./scripts/update.sh                  # flatpak update Pegasus + your emulators
-./scripts/restore.sh --list          # show backups
-./scripts/restore.sh                 # restore the most recent backup
-./scripts/uninstall.sh --dry-run     # preview removal of generated config
-./scripts/uninstall.sh               # remove generated config (ROMs preserved)
-./scripts/uninstall.sh --remove-flatpaks   # also remove the installed emulators+Pegasus
-```
+Every script supports `--help`, and the state-changing ones support `--dry-run`.
+
+| Script | What it does |
+|---|---|
+| `scripts/deploy.sh` | Main configurator — detect, install Pegasus + emulators, install cores, generate config. Also `--repair`, `--list-emulators`, `--list-systems`, `--restore`. |
+| `scripts/validate.sh` | Post-deploy pass/fail check: installs, sandbox ROM access, metadata, RetroArch cores, BIOS preflight. |
+| `scripts/autoscraper.sh` | Scrape box art + metadata with Skyscraper, in an isolated Podman container. |
+| `scripts/cleanup.sh` | Hide disc-track / duplicate files from Pegasus (re-syncs `extensions:`; never deletes ROMs/media). |
+| `scripts/install-cores.sh` | (Re)install RetroArch libretro cores from the official buildbot. |
+| `scripts/add-to-steam.sh` | Add Pegasus to Steam so it launches from Game Mode. |
+| `scripts/update.sh` | `flatpak update --user` the managed Pegasus + emulators. |
+| `scripts/restore.sh` | Restore Pegasus config from a timestamped backup (`--list` to browse). |
+| `scripts/uninstall.sh` | Remove generated config (ROMs preserved); `--remove-flatpaks` also removes the apps. |
 
 ## Configuration
 
@@ -154,6 +153,8 @@ behaviour — those need a real Bazzite machine. See
 - [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) — common Bazzite/Pegasus/Flatpak problems
 - [docs/SCRAPING.md](docs/SCRAPING.md) — scrape artwork/metadata with Skyscraper (Podman)
 - [docs/TESTING.md](docs/TESTING.md) — what the container test proves and what it doesn't
+- [docs/ROADMAP.md](docs/ROADMAP.md) — release status, known limitations, planned work
+- [CHANGELOG.md](CHANGELOG.md) — release history
 
 Contributing? See [CONTRIBUTING.md](CONTRIBUTING.md) for the dev gate (`make
 check` / `make smoke-fedora`), how to add a system or emulator, and branch/PR
@@ -161,12 +162,17 @@ conventions.
 
 ## Known limitations
 
-- Final runtime validation (actually launching games) requires a real Bazzite
-  machine; the dev host / container cannot prove it.
-- RetroArch cores are not bundled by Flathub — install them once via RetroArch's
-  Core Downloader (each system's metadata documents the expected core).
-- BIOS/firmware for PCSX2/RPCS3/etc. must be provided by you.
+- RetroArch cores are downloaded for you by default (`install_cores: yes`); set
+  it to `no` to manage them yourself via RetroArch's Core Downloader.
+- BIOS/firmware for PCSX2/RPCS3/DuckStation/etc. must be provided by you
+  (`validate.sh` flags where they go; nothing copyrighted is ever installed).
+- Multi-disc games (e.g. Final Fantasy VII Disc 1/2/3) currently show one entry
+  per disc; `.m3u` playlist grouping is a planned enhancement (see
+  [docs/ROADMAP.md](docs/ROADMAP.md)).
 - ScummVM and MAME need per-game/per-set setup beyond a generic launch line.
+- Vita3K is experimental and PS Vita support is best-effort.
+
+See [docs/ROADMAP.md](docs/ROADMAP.md) for status and planned work.
 
 ## License
 

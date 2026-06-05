@@ -1,149 +1,93 @@
 # Changelog
 
-All notable changes to this project are documented here. Format loosely follows
-[Keep a Changelog](https://keepachangelog.com/); this project uses date-based
-pre-1.0 development entries until the first tagged release.
+All notable changes to this project are documented here. Format follows
+[Keep a Changelog](https://keepachangelog.com/) and this project adheres to
+[Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-### Changed
-- RetroArch core installation is now built into `deploy.sh` via the
-  `install_cores` config option (default `yes`): once RetroArch is installed,
-  deploy fetches the cores the configured systems need. Logic extracted to a
-  shared `scripts/lib/cores.sh` used by both `deploy.sh` and the standalone
-  `install-cores.sh`. Dry-run previews cores/URLs; downloads are skipped unless
-  RetroArch is present (#52).
-- Test/CI hardening (#27): smoke harness defaults to **Fedora 44** (Bazzite 44's
-  base) and accepts any image via `PBC_SMOKE_IMAGE` / a full image ref (so a
-  trusted Bazzite image can be used); CI runs the smoke suite across a Fedora
-  42/43/44 matrix and now lints the `lib/*.sh` modules directly.
-- `controller_friendly` now actually affects generated launch lines: `no` emits
-  windowed/desktop variants for DuckStation/PCSX2/Dolphin/RPCS3 (default `yes`
-  output is unchanged). `target=gamemode` now surfaces a clear outstanding action
-  on how to add Pegasus to Steam for Game Mode (#16).
+_Nothing yet._
+
+## [1.0.0] - 2026-06-05
+
+First release. Validated end-to-end on real Bazzite (Bazzite 44, desktop and via
+the live deployment used during development).
 
 ### Added
-- `scripts/cleanup.sh` (#64) — tidy the Pegasus library without deleting data:
-  re-syncs each system's collection `extensions:` line to the catalog so
-  multi-track disc files (e.g. PS1 `.cue`+`.bin` audio tracks) are no longer
-  listed as duplicate games. Backs up before changing, `--config`/`--roms`/
-  `--system`/`--dry-run`/`-y`, preserves launch commands + scraped entries/art,
-  and never touches ROMs/media. Also: `psx` extensions no longer include
-  `bin`/`img` (they are tracks referenced by the `.cue`); `megadrive` keeps `bin`
-  (a whole cartridge ROM).
-- `scripts/autoscraper.sh` (#56) — scrape box art + metadata for your Pegasus
-  collections with Skyscraper, built/run in an isolated Podman container
-  (Bazzite-friendly; nothing layered onto the host). Contributed by @korkibucek,
-  then brought to project standards: `#!/usr/bin/env bash` + strict mode, lib
-  logging/colors/prompts, `--config`/`--roms`/`--system`/`--user`/`--rebuild`/
-  `--dry-run`/`-y`/`--help`, dry-run-aware podman, no hardcoded ROM path (defaults
-  to the config/EmuDeck library/`$HOME/ROMs`). Documented in docs/SCRAPING.md;
-  added to lint + smoke coverage.
-- Vita3K (PS Vita) support via its **official AppImage** (#54): Vita3K isn't on
-  Flathub, so it's now installed by downloading `Vita3K-<arch>.AppImage` (HTTPS,
-  ELF-verified, `chmod +x`) to `~/Applications/`. Adds a general AppImage-backed
-  emulator path (`EMU_APPIMAGE`); AppImages run on the host (no sandbox, direct
-  ROM access). Restores the `vita` system. Supersedes the #50 stop-gap that
-  marked Vita3K unavailable.
-- `LICENSE` (Apache-2.0) + `NOTICE`; README license section updated (#39).
-- `CONTRIBUTING.md` — developer guide: repo layout, local dev gate, how to add a
-  system/emulator, branch/PR conventions, and the hardware-validation boundary;
-  linked from README (#38).
-- RetroArch core-presence check in `validate.sh` (#40): per configured RetroArch
-  system, WARNs (never fails) when its `<core>_libretro.so` is missing, with the
-  exact path and the install command — catching the common "Failed to load core".
-- `scripts/add-to-steam.sh` (#22): opt-in helper that adds Pegasus to Steam as a
-  non-Steam game for Game Mode. Safely edits the binary `shortcuts.vdf` via a
-  stdlib-Python parser (`lib/steam_shortcuts.py`): refuses to run while Steam is
-  open, backs up the file first, and appends idempotently without disturbing
-  existing shortcuts. Dry-run supported; covered by a round-trip self-test.
-- `scripts/install-cores.sh` (#24): opt-in helper that downloads the libretro
-  cores required by your selected RetroArch systems from the official libretro
-  buildbot (HTTPS, host pinned). Each download is validated as a real ZIP before
-  extraction and never executed; existing cores are kept unless `--force` (and
-  backed up). Dry-run lists cores + URLs and downloads nothing.
-- Expanded catalog (#25): emulators Flycast, Cemu, xemu; systems
-  saturn, neogeo, lynx, wonderswan, c64, amiga (RetroArch cores) plus wiiu,
-  xbox (standalone). ES-DE folder aliases added (e.g. `atarilynx`). New systems
-  auto-include when their emulator is selected.
-- Operational flags (#26): `deploy.sh --repair` re-applies only the Flatpak
-  sandbox permissions (ROM `--filesystem` access + Pegasus host-spawn), and
-  `--list-emulators` / `--list-systems` print the catalogs. List output is
-  SIGPIPE-safe (pipe to `head`/`grep` without errors).
-- BIOS/firmware preflight in `validate.sh` (#23): WARNs (never fails) per
-  selected emulator when the expected BIOS directory is empty/missing, printing
-  the exact target path and a hint. Never lists or fetches copyrighted files.
-- EmuDeck / ES-DE library reuse (#21): detects an existing `~/Emulation/roms`
-  (incl. SD cards) and can adopt it as `rom_root` (`reuse_existing_library:
-  auto|yes|no`). Reconciles differing folder names via an alias map (e.g. ES-DE
-  `gc` for GameCube) so metadata is written into existing folders rather than
-  duplicates. ROMs are never moved/deleted.
-- Per-system emulator overrides via the `system_emulators` config key
-  (`shortname=emulator[:core]`), so a system can target a different installed
-  emulator without editing `config/systems/*.conf`. Validated; auto-includes a
-  system when its effective emulator is selected. Makes the DuckStation →
-  SwanStation fallback a one-liner (#20).
-- `scripts/uninstall.sh` — removes generated metadata/`HOW_TO_ADD_ROMS.txt`,
-  deregisters our `game_dirs.txt` entries (keeping user-added ones), and
-  optionally `flatpak uninstall --user` the emulators+Pegasus (`--remove-flatpaks`).
-  ROM files and media are never touched; everything is backed up first (#17).
-- `scripts/update.sh` — `flatpak update --user` for the configured Pegasus +
-  emulators (#17).
+
+**Core**
+- Deployment engine (`scripts/deploy.sh`): interactive and non-interactive
+  (`--config`) modes, `--dry-run`, `--force`, `--repair`, `--list-emulators`,
+  `--list-systems`, `--restore`, structured logging, timestamped backups, and a
+  final deployment summary.
+- Defensive platform detection (Bazzite / Fedora Atomic / handheld vs desktop)
+  and prerequisite checks (network, flatpak + Flathub, disk, write access,
+  existing install state).
+- Pegasus Frontend install via Flathub with cross-sandbox launch handling
+  (`flatpak-spawn --host` + `--talk-name=org.freedesktop.Flatpak`), and
+  per-emulator ROM-path `flatpak override` permissions.
+- Data-driven system catalog (`config/systems/*.conf`) and generated, space-safe
+  `metadata.pegasus.txt` per system; dependency-free YAML-subset config parser
+  (no `yq`).
+
+**Emulators & systems**
+- Emulator catalog: RetroArch, Dolphin, PCSX2, PPSSPP, DuckStation, RPCS3, MAME,
+  melonDS, ScummVM, Flycast, Cemu (Wii U), xemu (Xbox), and Vita3K (PS Vita, via
+  its official AppImage — not on Flathub). Switch emulators are intentionally
+  excluded (documented).
+- Per-system emulator overrides via `system_emulators` (`shortname=emulator[:core]`)
+  — e.g. the DuckStation → SwanStation fallback as a one-liner.
+- ES-DE/EmuDeck library reuse (`reuse_existing_library`): detect `~/Emulation/roms`
+  (incl. SD cards) and reconcile folder names (e.g. ES-DE `gc`) without moving ROMs.
+
+**Helper tools**
+- `scripts/install-cores.sh` and built-in `install_cores` — download the libretro
+  cores RetroArch systems need from the official buildbot (HTTPS, zip-validated).
+- `scripts/autoscraper.sh` — scrape box art + metadata with Skyscraper in an
+  isolated Podman container (Bazzite-friendly; nothing layered onto the host).
+- `scripts/cleanup.sh` — hide disc-track/duplicate files from Pegasus by
+  re-syncing collection `extensions:`; never deletes ROMs/media.
+- `scripts/add-to-steam.sh` — add Pegasus to Steam for Game Mode (safe binary
+  `shortcuts.vdf` editing).
+- `scripts/update.sh`, `scripts/restore.sh`, `scripts/uninstall.sh` — lifecycle.
+- `scripts/validate.sh` — post-deploy pass/fail check incl. Flatpak ROM access,
+  RetroArch core presence, and a BIOS/firmware preflight (never fetches BIOS).
+
+**Project**
+- Apache-2.0 `LICENSE` + `NOTICE`; `CONTRIBUTING.md`; full `docs/` set.
+- Fedora-container smoke test (`make smoke-fedora`), unit-test suite
+  (`tests/run-tests.sh`), ShellCheck-clean scripts, CI (ShellCheck + unit +
+  Fedora 42/43/44 matrix), and issue/PR templates.
+
+### Changed
+- RetroArch core installation is built into `deploy.sh` via `install_cores`
+  (default `yes`); shared logic in `scripts/lib/cores.sh`.
+- `controller_friendly` affects launch lines (`no` → windowed variants for
+  DuckStation/PCSX2/Dolphin/RPCS3); `target=gamemode` surfaces a "add to Steam"
+  action.
+- CI smoke harness defaults to **Fedora 44** and accepts any image via
+  `PBC_SMOKE_IMAGE`; runs a Fedora 42/43/44 matrix and lints `lib/*.sh` directly.
 
 ### Fixed
-- autoscraper: scraped art/metadata now actually appears in Pegasus (#60). Two
-  fixes: pass Skyscraper `--flags unattend` so it overwrites the deploy-created
-  `metadata.pegasus.txt` instead of stopping at an interactive "overwrite? (y/N)"
-  prompt; and bind-mount the ROM dir at its **real host path** so the `file:`/
-  `assets.*` paths written into the metadata are valid on the host (not
-  container-only `/roms/...`). Added `-G/--generate-only` to rebuild metadata
-  from the existing cache (re-fix already-scraped systems without re-downloading)
-  and made the podman `-it` flags TTY-aware.
-- Removed Vita3K/`vita` from the catalog — it is **not on Flathub** (only its own
-  GitHub/AppImage builds), so its install always failed and left the run in an
-  error state. PS Vita is now documented as unsupported by the Flatpak flow (#50).
+- **Bazzite blocker:** all `--user` Flatpak installs failed because Bazzite ships
+  flathub only as a filtered *system* remote — `ensure_flathub` is now scope-aware
+  and adds a `--user` remote when missing.
+- Vita3K install always failed (it isn't on Flathub) — now installed via its
+  official AppImage instead.
+- Scraped art didn't appear in Pegasus — pass Skyscraper `--flags unattend`
+  (overwrite the deploy metadata without prompting) and mount the ROM dir at its
+  real host path so `file:`/`assets.*` paths are host-valid; added
+  `--generate-only`.
+- PS1 disc-track `.bin` files showed as duplicate games — `psx` `extensions:` no
+  longer list `bin`/`img`; `cleanup.sh` re-syncs existing libraries.
 - `pegasus_install: skip` now still configures an already-installed Pegasus
-  flatpak — sets the `flatpak-spawn --host` launch prefix and grants ROM
-  `--filesystem` access (without installing) so the generated config works for
-  users who manage Pegasus themselves (#48).
-- **Blocker on real Bazzite (#44):** all `--user` Flatpak installs failed because
-  Bazzite ships flathub only as a filtered *system* remote and `ensure_flathub`
-  was scope-blind. It now checks the *user* scope and adds a `--user` flathub
-  remote when missing, so emulator/Pegasus installs work out of the box.
-- Flatpak install failures now surface the real flatpak error via
-  `run_cmd_capture` instead of an opaque "Failed to install X" (#45).
-- Non-writable `rom_root` (e.g. `/var/ROMS`) now produces actionable suggestions
-  and an interactive re-prompt instead of a dead-end abort (#46).
-- `write_file` lost the trailing newline (content came through `$(cat)`), so
-  generated files had no final newline and appends to `game_dirs.txt` glued onto
-  the last line. Now writes exactly one trailing newline (found via #17).
+  flatpak (launch prefix + ROM access).
+- Flatpak install failures surface the real error (`run_cmd_capture`).
+- Non-writable `rom_root` gives actionable suggestions + an interactive re-prompt.
+- `write_file` writes exactly one trailing newline (fixed `game_dirs.txt` gluing).
+- `backup_begin` no longer allocates its dir in a subshell; `--force` is no longer
+  overridden by the config file; `print_summary` no longer trips the `set -e` ERR
+  trap on real runs.
 
-### Added (earlier)
-- Initial deployment engine (`scripts/deploy.sh`) with interactive and
-  non-interactive (`--config`) modes, dry-run, force, logging, backup, and a
-  final deployment summary.
-- Defensive platform detection (Bazzite / Fedora Atomic / handheld vs desktop).
-- Prerequisite checks (network, flatpak + Flathub, disk, write access, existing
-  install state).
-- Emulator catalog (RetroArch, Dolphin, PCSX2, PPSSPP, DuckStation, RPCS3, MAME,
-  melonDS, ScummVM) installed via Flathub with per-emulator ROM-path
-  `flatpak override` permissions.
-- Pegasus Frontend install via Flathub with cross-sandbox launch handling
-  (`flatpak-spawn --host` + `--talk-name=org.freedesktop.Flatpak`).
-- Data-driven system catalog (`config/systems/*.conf`) and generated
-  `metadata.pegasus.txt` per system with space-safe launch commands.
-- Timestamped backups + `scripts/restore.sh`.
-- `scripts/validate.sh` post-deployment pass/fail checker (including Flatpak ROM
-  access verification).
-- Dependency-free YAML-subset config parser (no `yq` required).
-- Fedora-container smoke test (`scripts/smoke-fedora-container.sh`,
-  `make smoke-fedora`) and a unit-test suite (`tests/run-tests.sh`).
-- ShellCheck-clean scripts, `Makefile`, CI workflow, issue/PR templates.
-- Full documentation set under `docs/`.
-
-### Fixed (during initial development)
-- `backup_begin` set its directory in a command-substitution subshell, so the
-  parent never recorded the backup path and each file got its own timestamp.
-- `--force` was overridden by the config file's `mode`; CLI flags now win.
-- `print_summary` ended with `is_dry_run && …`, returning non-zero on real runs
-  and spuriously tripping the `set -e` ERR trap (every real run would exit 1).
+[Unreleased]: https://github.com/korkibucek/pegasus-bazzite-configurator/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/korkibucek/pegasus-bazzite-configurator/releases/tag/v1.0.0
